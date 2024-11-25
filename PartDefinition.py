@@ -12,7 +12,7 @@ class Hinge:
     define the geometry and materials properties of the Hinge
     as well as any calculation
     """
-    def __init__(self, h=0, w=0, D1=0, D2=0, t1=0, t2=0, e1=0, e2=0, E=0, G=0, rho=0, sigmaY=0) -> None:
+    def __init__(self, h=0, w=0, D1=0, D2=0, t1=0, t2=0, e1=0, e2=0, E=70e9, G=0, rho=0, sigmaY=0) -> None:
         self.h = h
         self.D2 = D2
         self.t2 = t2
@@ -38,7 +38,7 @@ class Fastener:
     define geometry material properties and forces on a bolt
     geometry taken from WP4 p20-21
     """
-    def __init__(self, d_uh_brg=0, L_h=0, D_h=0, d_sha=0, L_n=0, d=0, sw=0, L1=0, L2=0, L3=0, E_b=0, E_n=0, G=0, sigmaY=0, rho=0) -> None:
+    def __init__(self, d_uh_brg=0, L_h=0, D_h=0, d_sha=0, L_n=0, d=0, sw=0, L1=0, L2=0, L3=0, E_b=0, E_n=70e9, G=0, sigmaY=0, rho=0) -> None:
         self.d_uh_brg = d_uh_brg
         self.L_h = L_h
         self.D_h = D_h
