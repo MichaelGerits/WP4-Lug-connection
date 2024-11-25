@@ -14,10 +14,7 @@ class Hinge:
     """
     def __init__(self, h=0, w=0, D1=0, D2=0, t1=0, t2=0, e1=0, e2=0, E=0, G=0, rho=0, sigmaY=0) -> None:
         self.h = h
-        self.w = w
-        self.D1 = D1
         self.D2 = D2
-        self.t1 = t1
         self.t2 = t2
         self.e1 = e1 #limits depending on the material choice
         self.e2 = e2
@@ -27,13 +24,13 @@ class Hinge:
         self.K_t = -0.05 * w/D1 + 3.05 #from appendix A tab D1.3, Curve 1 (W/D up to 3)
         self.rho = rho
         self.sigmaY = sigmaY
-        self.K_bry =1.85 #P17 eq9 says so
+        # self.K_bry =1.85 #P17 eq9 says so
 
         """
         Variables for bending of the lug 
         """
         self.A_frac = 6 / (D1 * (4/(0.5*w-m.sqrt(2)*0.25 * D1) + 2/(0.5*(w-D1)))) # p18 fig D1.15
-        K_bending = 1.2143 * A_frac
+        self.K_bending = 1.2143 * self.A_frac
         pass
 
 class Fastener:
