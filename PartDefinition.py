@@ -5,6 +5,8 @@ import numpy as np
 Below the definition goes as follows: A hinge is the entirety and the Lugs are the flanges of said hinge
 """
 
+fastenerAmount = 4 #the amount of fasteners per Hinge
+
 class Hinge:
     """
     define the geometry and materials properties of the Hinge
@@ -17,7 +19,7 @@ class Hinge:
         self.D2 = D2
         self.t1 = t1
         self.t2 = t2
-        self.e1 = e1
+        self.e1 = e1 #limits depending on the material choice
         self.e2 = e2
 
         self.E = E
@@ -45,6 +47,7 @@ class Fastener:
         self.D_h = D_h
         self.d_sha = d_sha
         self.d = d
+        self.sw = sw
 
         self.L_n = L_n
         self.L1 = L1
@@ -52,7 +55,7 @@ class Fastener:
         self.L3 = L3
         self.Lj = L1+L2+L3 #sum of the previous three lengths as per page 21
         self.L_h_sub = x*d #TODO: decide on nut geometry to find factor
-        self.L_eng_sub = x*d #TODO: decide on nut geometry to find factor
+        self.L_eng_sub = x*d #TODO: decide on nut geometry to find factor Table 7.1 page 22
         self.L_n_sub = x*d #TODO: decide on nut geometry to find factor
 
         self.E_b = E_b
