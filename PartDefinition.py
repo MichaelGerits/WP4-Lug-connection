@@ -33,7 +33,7 @@ class Hinge:
         Variables for bending of the lug 
         """
         self.A_frac = 6 / (D1 * (4/(0.5*w-m.sqrt(2)*0.25 * D1) + 2/(0.5*(w-D1)))) # p18 fig D1.15
-        K_bending = 
+        K_bending = 1.2143 * A_frac
         pass
 
 class Fastener:
