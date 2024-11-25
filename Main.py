@@ -1,9 +1,9 @@
-import math as m
+import math
 import numpy as np
 import PartDefinition as PD
 import Loads
 
-# 4.3
+# 4.3------------------------------------------------------------------------------------------------------------------------------------
 hinge = PD.Hinge(sigmaY=250)
 Loads.F1 = F1
 
@@ -48,6 +48,18 @@ width = (P[1] + F1) * 1.5 / 4 / (K_t * hinge.sigmaY) / t + D1#Bending
 m = t * (w ** 2 - D1 ** 2) #Tension of net section
 print(t, hole_Diameter)
 
+#-------------------------------------------------------------------------------------------------------------------------------------------
+
+#4.4
+"""
+calculates the dimensions of the baseplate with the initial hole dimension 
+"""
+
+holeSepFac = 2.5
+
+hinge.w = w #TODO: update this with Anwita's calculations
+hinge.D2 = 
+hinge.e2 = 1.5*hinge.D2
 
 
-
+hinge.depth = 2*(2* hinge.e2 + hinge.t1) + hinge.h
