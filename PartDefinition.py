@@ -28,13 +28,6 @@ class Hinge:
         self.K_t = -0.05 * w/D1 + 3.05 #from appendix A tab D1.3, Curve 1 (W/D up to 3)
         self.rho = rho
         self.sigmaY = sigmaY
-        # self.K_bry =1.85 #P17 eq9 says so
-
-        """
-        Variables for bending of the lug 
-        """
-        self.A_frac = 6 / (D1 * (4/(0.5*w-m.sqrt(2)*0.25 * D1) + 2/(0.5*(w-D1)))) # p18 fig D1.15
-        self.K_bending = 1.2143 * self.A_frac
         pass
 
 class Fastener:
@@ -67,5 +60,5 @@ class Fastener:
         pass
 
     def CalcCompliance(self):
-        comp = 0
+        self.comp = 0
         #TODO: sum up the elongations and divide by the youngs modulus

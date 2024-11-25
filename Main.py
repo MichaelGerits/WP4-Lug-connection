@@ -3,17 +3,25 @@ import numpy as np
 import PartDefinition as PD
 import Loads
 
-hinge = PD.Hinge(sigmaY=250)
-Loads.F1 = F1 #TODO what does this mean?
+"""
+Below are a list of functions which sequentially calculate the dimensions and the stresses of the hinge
+These are made functions such that they can be ran again through itteration.
+
+The result of each calculation will be Saved in the hinge object, such that one reference poijt exists.
+"""
+#initial definition of the hinge obect
+hinge = PD.Hinge(t1=0.001, D1=0.01, w=0.01 ,sigmaY=250)
+
 # 4.3------------------------------------------------------------------------------------------------------------------------------------
-def CalcLugDim(t1_init = 0.001, D1_init = 0.01):
-    #TODO: explain what you're doing here please
+Loads.F1 = F1 #TODO what does this mean?
+def CalcLugDim(t1_init, D1_init, w_init):
+    #TODO: explain how the algorithm works please
     """
 
     """
 
     D1 = D1_init
-    w = D1
+    w = w_init
     t1 = t1_init #m
     mValuesA = []
     DValuesA = []
@@ -35,7 +43,7 @@ def CalcLugDim(t1_init = 0.001, D1_init = 0.01):
     """
 
     D1 = D1_init
-    w = D1
+    w = w_init
     t1 = t1_init #m
     mValuesB = []
     DValuesB = []
@@ -50,6 +58,8 @@ def CalcLugDim(t1_init = 0.001, D1_init = 0.01):
         DValuesB.append(D1)
         wValuesB.append(w)
         t1 += 0.001
+
+    #TODO: explain how the optimum is chosen
 
     mMinList = [min(mValuesA), min(mValuesB)]
     mMax = max(mMinList)
@@ -72,12 +82,12 @@ def CalcLugDim(t1_init = 0.001, D1_init = 0.01):
     print(f"t = {t1}", f"hole diameter = {D1}", f"width = {w}")
 #-------------------------------------------------------------------------------------------------------------------------------------------
 #runs the function for the first time
-CalcLugDim()
+CalcLugDim(hinge.t1, hinge.D1, hinge.w)
 
 #4.4-----------------------------------------------------------------------------------------------------------------
 def CalcBasePlateDim(e1Fac=1.5, e2Fac=1.5, holeSepFac=2.5):
     """
-    calculates the dimensions of the baseplate with the initial hole dimension 
+    calculates the dimensions of the baseplate with the width and the factors of seperation
     """
 
     hinge.D2 = hinge.w/(2+ 2 * e1Fac + holeSepFac)
@@ -88,3 +98,5 @@ def CalcBasePlateDim(e1Fac=1.5, e2Fac=1.5, holeSepFac=2.5):
 #---------------------------------------------------------------------------------------------------------------------------
 #runs the function for the first time
 CalcBasePlateDim()
+
+#TODO:calculate h
