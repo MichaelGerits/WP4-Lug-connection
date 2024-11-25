@@ -1,4 +1,4 @@
-import math as m
+import math
 import numpy as np
 import PartDefinition as PD
 import Loads
