@@ -13,7 +13,7 @@ T = np.zeros(3)
 
 H = 0.4  #m
 
-F1 = T[0] * H
+F1 = T[0] * H #See this thing is actually twice of the actual force, but then I divide by 4 instead of 2 later im sorry its so questionable
 
 
 
