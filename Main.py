@@ -101,16 +101,16 @@ def CalcLugDim(t1_init, D1_init, w_init):
 CalcLugDim(hinge.t1, hinge.D1, hinge.w)
 
 #4.4-----------------------------------------------------------------------------------------------------------------
-def CalcBasePlateDim(e1Fac=1.5, e2Fac=1.5, holeSepFac=2.5, fastenerAmount=PD.fastenerAmount):
+def CalcBasePlateDim(e1Fac=1.5, e2Fac=1.5, holeSepFac=2.5, fastenerAmount=PD.fastenerAmount, fastenerColumns = PD.fastenerColumns):
     """
     calculates the dimensions of the baseplate with the width and the factors of seperation
     """
 
-    hinge.D2 = hinge.w/(fastenerAmount/2 + 2 * e1Fac + holeSepFac*(fastenerAmount/2-1))
+    hinge.D2 = hinge.w/(fastenerAmount/fastenerColumns + 2 * e1Fac + holeSepFac*(fastenerAmount/fastenerColumns-1))
     hinge.e1 = e1Fac*hinge.D2
     hinge.e2 = e2Fac*hinge.D2
 
-    hinge.depth = 2*(2* hinge.e2 + hinge.t1) + hinge.h
+    hinge.depth = 2*(2* hinge.e2 + hinge.t1 + fastenerColumns/2) + hinge.h
 #---------------------------------------------------------------------------------------------------------------------------
 #runs the function for the first time
 CalcBasePlateDim()
