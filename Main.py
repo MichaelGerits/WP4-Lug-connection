@@ -2,6 +2,7 @@ import math
 import numpy as np
 import PartDefinition as PD
 import Loads
+import itertools
 
 """
 Below are a list of functions which sequentially calculate the dimensions and the stresses of the hinge
@@ -110,7 +111,7 @@ def CalcBasePlateDim(e1Fac=1.5, e2Fac=1.5, holeSepFac=2.5, fastenerAmount=PD.fas
     hinge.e1 = e1Fac*hinge.D2
     hinge.e2 = e2Fac*hinge.D2
 
-    hinge.depth = 2*(2* hinge.e2 + hinge.t1 + fastenerColumns/2) + hinge.h
+    hinge.depth = 2*(2* hinge.e2 + hinge.t1 + fastenerColumns/2 * holeSepFac*hinge.D2) + hinge.h
 #---------------------------------------------------------------------------------------------------------------------------
 #runs the function for the first time
 CalcBasePlateDim()
@@ -118,7 +119,7 @@ CalcBasePlateDim()
 #TODO:calculate h
 #4.5------------------------------------------------------------------------------------------------------------------------
 
-def CalcCG(fastenerAmount = PD.fastenerAmount):
+def CalcCG(fastenerAmount = PD.fastenerAmount, columnAmount = PD.fastenerColumns):
     """
     calculate the centre of gravity of the fasteners
     
@@ -133,16 +134,19 @@ def CalcCG(fastenerAmount = PD.fastenerAmount):
     Fasteners = list(fastenerAmount)
 
     #define the list of z positions
-    posZs = np.linspace(hinge.w/2 - hinge.e1, -hinge.w/2 + hinge.e1, fastenerAmount/2)
-
+    posZs = np.linspace((hinge.w/2 - hinge.e1), (-hinge.w/2 + hinge.e1), (fastenerAmount/columnAmount))
+    #ceates the positive x positions
+    posXs = np.linspace((hinge.depth/2 - hinge.e2), (hinge.t1 + hinge.h/2 + hinge.e2), columnAmount/2)
+    #mirrors for the negative x positions
+    posXs = np.append(posX, -posX[::-1])
+    #creates a list with all the positions
+    posTup = list(itertools.product(posXs, posZs))
     #define the fasteners and their positions
-    for i in range(fastenerAmount):
-        #deside on which side the fastener is
-        xSign = 1 if i%2==0 else -1
 
+
+    for i in range(fastenerAmount):
         #calculate positions
-        posX = xSign * (hinge.depth/4 + hinge.h/4 + hinge.t1/2)
-        posZ = posZs[math.floor(i/2)]
+        posX, posZ = posTup[i]
 
         #add to the list of fasteners
         Fasteners[i] = PD.Fastener(D_h = hinge.D2, xPos=posX, zPos=posZ)
