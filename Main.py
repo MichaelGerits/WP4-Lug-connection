@@ -13,10 +13,16 @@ The result of each calculation will be Saved in the hinge object, such that one 
 hinge = PD.Hinge(t1=0.001, D1=0.01, w=0.01 ,sigmaY=250)
 
 # 4.3------------------------------------------------------------------------------------------------------------------------------------
-Loads.F1 = F1 #TODO what does this mean?
+F1 = Loads.F1 #The force caused by the moment, defined in the Loads docuent
+P = Loads.P
+
 def CalcLugDim(t1_init, D1_init, w_init):
     #TODO: explain how the algorithm works please
     """
+    The program runs through a range of values for thickness(t), and finds hole diameter(D1) and width(w)
+    that will meet the bearing and bending stress (hence the two different for loops. one checks for
+    bearing, the other for bending. Then, the code finds a "mass(m)" that isnt really mass, but this value
+    is proportional to mass. Thus, this value takes on a minimum when mass is a minimum. Then the code finds
 
     """
 
@@ -50,9 +56,11 @@ def CalcLugDim(t1_init, D1_init, w_init):
     wValuesB = []
 
     while t1 < 0.25:
-        A_frac = 6 / (D1 * (4/(0.5*w-m.sqrt(2)*0.25 * D1) + 2/(0.5*(w-D1)))) # p18 fig D1.15
+        A_frac = 6 / (D1 * (4/(0.5*w-math.sqrt(2)*0.25 * D1) + 2/(0.5*(w-D1)))) # p18 fig D1.15
         K_bending = 1.2143 * A_frac #Fig D1.15 page 18
-        D = Loads.P[0] / 4 / (hinge.K_bending * hinge.sigmaY) / t #Bending
+        D1 = P[0] / 4 / (K_bending * hinge.sigmaY) / t #Bending
+        K_t = -0.05 * w / D1 + 3.05
+        w = (P[1] + F1) * 1.5 / 4 / (K_t * hinge.sigmaY) / t1 + D1
         m = t1 * (w ** 2 - D1 ** 2) #this value is not actually mass, but it is proportional to mass
         mValuesB.append(m)
         DValuesB.append(D1)
@@ -60,17 +68,25 @@ def CalcLugDim(t1_init, D1_init, w_init):
         t1 += 0.001
 
     #TODO: explain how the optimum is chosen
+    dList = []
+    mList = []
+    for i in range(len(DValuesA)):
+        dList.append([DValuesA[i], DValuesB[i], mValuesA[i], mValuesB[i]])
+        if dList[i][0] >= dList[i][1]:
+            dList[i].append("A")
+            mList.append(dList[i][2])
+        else:
+            dList[i].append("B")
+            mList.append(dList[i][3])
 
-    mMinList = [min(mValuesA), min(mValuesB)]
-    mMax = max(mMinList)
-    mMaxIndex = mMinList.index(mMax)
-    if mMaxIndex == 0:
-        mMinIndex = mValuesA.index(mMax)
+    mMin = min(mList)
+    mMinIndex = mList.index(mMin)
+
+    if dList[mMinIndex][4] == "A":
         t = mMinIndex * 0.001 + 0.001
         D1 = DValuesA[mMinIndex]  # Bearing stress (1.5 is MS)
         w = wValuesA[mMinIndex]
     else:
-        mMinIndex = mValuesB.index(mMax)
         t1 = mMinIndex * 0.001 + 0.001
         D1 = DValuesB[mMinIndex]  # Bearing stress (1.5 is MS)
         w = wValuesB[mMinIndex]
