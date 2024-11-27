@@ -10,7 +10,7 @@ These are made functions such that they can be ran again through itteration.
 The result of each calculation will be Saved in the hinge object, such that one reference poijt exists.
 """
 #initial definition of the hinge obect
-hinge = PD.Hinge(t1=0.001, D1=0.01, w=0.01 ,sigmaY=250)
+hinge = PD.Hinge(t1=0.001, D1=0.01, w=0.02 ,sigmaY=250000000)
 
 # 4.3------------------------------------------------------------------------------------------------------------------------------------
 
@@ -69,7 +69,7 @@ def CalcLugDim(t1_init, D1_init, w_init):
     while t1 < 0.25:
         A_frac = 6 / (D1 * (4/(0.5*w-math.sqrt(2)*0.25 * D1) + 2/(0.5*(w-D1)))) # p18 fig D1.15
         K_bending = 1.2143 * A_frac #Fig D1.15 page 18
-        D1 = P[0] / 4 / (K_bending * hinge.sigmaY) / t #Bending
+        D1 = P[0] / 4 / (K_bending * hinge.sigmaY) / t1 #Bending
         K_t = -0.05 * w / D1 + 3.05
         w = (P[1] + F1) * 1.5 / 4 / (K_t * hinge.sigmaY) / t1 + D1
         m = t1 * (w ** 2 - D1 ** 2) #this value is not actually mass, but it is proportional to mass
@@ -79,7 +79,7 @@ def CalcLugDim(t1_init, D1_init, w_init):
         t1 += 0.001
 
     dTest = (DValuesA > DValuesB)
-    mList = [a if c==1 else b for a,b,c in zip(mValuesA, mValuesB, dTest)]
+    mList = [a if c==True else b for a,b,c in zip(mValuesA, mValuesB, dTest)]
     mMin = min(mList)
     mMinIndex = mList.index(mMin)
 
