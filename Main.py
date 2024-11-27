@@ -22,12 +22,12 @@ P = Loads.P
 def CalcLugDim(t1_init, D1_init, w_init):
     #explaination of what this thing does
     """
-    The program runs through a range of values for thickness(t), and finds hole diameter(D1) and width(w)
+    The program runs through a range of values for thickness(t1), and finds hole diameter(D1) and width(w)
     that will meet the bearing and bending stress (hence the two different for loops. one checks for
     bearing, the other for bending. Then, the code finds a "mass(m)" that isnt really mass, but this value
     is proportional to mass. Thus, this value takes on a minimum when mass is a minimum.
     The equations show that D1 is inversely proportional to both bearing stress and bending stress, for
-    constant w and t. So, the optimiser finds both values of D1 for a given t, and puts the resulting tuples
+    constant w and t1. So, the optimiser finds both values of D1 for a given t, and puts the resulting tuples
     in a list(dList) along with their corresponding masses. An if statement checks which one is bigger, and
     appends either an A or a B. Then, a list(mList) is created with the corresponding m values. i.e. if the
     D1 required for bearing is bigger than the D1 required for bending, then an A is appended, and mList
@@ -43,19 +43,17 @@ def CalcLugDim(t1_init, D1_init, w_init):
     t1 = t1_init #m
 
     #Make lists to append bearing values of m, D1, and w to later
-    mValuesA = [] #Not actually mass
-    DValuesA = []
-    wValuesA = []
+    mValuesA, DValuesA, wValuesA = [np.array([])] * 3
 
     #Solves for Bearing stress for a range of t values
-    while t < 0.25:
+    while t1 < 0.25:
         D1 = (P[1] + F1) * 1.5 / 4 / hinge.sigmaY / t1 #Bearing stress (1.5 is MS)
         K_t = -0.05 * w/D1 + 3.05
         w = (P[1] + F1) * 1.5 / 4 / (K_t * hinge.sigmaY) / t1 + D1 #Tension of net section
         m = t1 * (w ** 2 - D1 ** 2) #this value is not actually mass, but it is proportional to mass
-        mValuesA.append(m)
-        DValuesA.append(D1)
-        wValuesA.append(w)
+        np.append(mValuesA, m)
+        np.append(DValuesA, D1)
+        np.append(wValuesA, w)
         t1 += 0.001
 
 
@@ -65,9 +63,7 @@ def CalcLugDim(t1_init, D1_init, w_init):
     t1 = t1_init #m
 
     #Make lists to append bending values of m, D1, and w to later
-    mValuesB = [] #Not actually mass
-    DValuesB = []
-    wValuesB = []
+    mValuesB, DValuesB, wValuesB = [np.array([])] * 3
 
     #Solves for bending stress for a range of t values
     while t1 < 0.25:
@@ -77,35 +73,23 @@ def CalcLugDim(t1_init, D1_init, w_init):
         K_t = -0.05 * w / D1 + 3.05
         w = (P[1] + F1) * 1.5 / 4 / (K_t * hinge.sigmaY) / t1 + D1
         m = t1 * (w ** 2 - D1 ** 2) #this value is not actually mass, but it is proportional to mass
-        mValuesB.append(m)
-        DValuesB.append(D1)
-        wValuesB.append(w)
+        np.append(mValuesB, m)
+        np.append(DValuesB, D1)
+        np.append(wValuesB, w)
         t1 += 0.001
 
-    #Make lists to contain values for D1 and m for both bearing and bending
-    dList = []
-    mList = []
-
-
-    for i in range(len(DValuesA)):
-        dList.append([DValuesA[i], DValuesB[i], mValuesA[i], mValuesB[i]])
-        if dList[i][0] >= dList[i][1]:
-            dList[i].append("A")
-            mList.append(dList[i][2])
-        else:
-            dList[i].append("B")
-            mList.append(dList[i][3])
-
+    dTest = (DValuesA > DValuesB)
+    mList = [a if c==1 else b for a,b,c in zip(mValuesA, mValuesB, dTest)]
     mMin = min(mList)
     mMinIndex = mList.index(mMin)
 
-    if dList[mMinIndex][4] == "A":
-        t = mMinIndex * 0.001 + 0.001
-        D1 = DValuesA[mMinIndex]  # Bearing stress (1.5 is MS)
+    if dTest == 1:
+        t1 = mMinIndex * 0.001 + 0.001
+        D1 = DValuesA[mMinIndex]
         w = wValuesA[mMinIndex]
     else:
         t1 = mMinIndex * 0.001 + 0.001
-        D1 = DValuesB[mMinIndex]  # Bearing stress (1.5 is MS)
+        D1 = DValuesB[mMinIndex]
         w = wValuesB[mMinIndex]
 
     #updates the new values to the hinge object
