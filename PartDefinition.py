@@ -1,5 +1,6 @@
 import math as m
 import numpy as np
+import Loads
 
 """
 Below the definition goes as follows: A hinge is the entirety and the Lugs are the flanges of said hinge
@@ -13,7 +14,7 @@ class Hinge:
     define the geometry and materials properties of the Hinge
     as well as any calculation
     """
-    def __init__(self, h=0, w=0, D1=0, D2=0, t1=0, t2=0, e1=0, e2=0, E=70e9, G=0, rho=0, sigmaY=0, depth=0) -> None:
+    def __init__(self, h=Loads.H/3, w=0, D1=0, D2=0, t1=0, t2=0, e1=0, e2=0, E=70e9, G=0, rho=0, sigmaY=0, depth=0) -> None:
         self.h = h
         self.D1 = D1
         self.D2 = D2
@@ -26,7 +27,6 @@ class Hinge:
 
         self.E = E
         self.G = G
-        self.K_t = -0.05 * w/D1 + 3.05 #from appendix A tab D1.3, Curve 1 (W/D up to 3)
         self.rho = rho
         self.sigmaY = sigmaY
         pass

@@ -6,7 +6,7 @@ import itertools
 
 """
 Below are a list of functions which sequentially calculate the dimensions and the stresses of the hinge
-These are made functions such that they can be ran again through itteration.
+These are made functions such that they can be ran again through iteration.
 
 The result of each calculation will be Saved in the hinge object, such that one reference poijt exists.
 """
@@ -34,6 +34,10 @@ def CalcLugDim(hinge):
     take these values from.
     """
 
+    t_step = 0.0001
+
+    t_step = 0.0001
+
     P = Loads.P
     F1 = Loads.F1
     #Declare initial values
@@ -44,16 +48,17 @@ def CalcLugDim(hinge):
     #Make lists to append bearing values of m, D1, and w to later
     mValuesA, DValuesA, wValuesA = [np.array([])] * 3
 
+
     #Solves for Bearing stress for a range of t values
     while t1 < 0.25:
         D1 = (P[1] + F1) * 1.5 / 4 / hinge.sigmaY / t1 #Bearing stress (1.5 is MS)
-        K_t = -0.05 * w/D1 + 3.05
+        K_t = -0.05 * w/D1 + 3.05 #from appendix A tab D1.3, Curve 1 (W/D up to 3)
         w = (P[1] + F1) * 1.5 / 4 / (K_t * hinge.sigmaY) / t1 + D1 #Tension of net section
         m = t1 * (w ** 2 - D1 ** 2) #this value is not actually mass, but it is proportional to mass
-        np.append(mValuesA, m)
-        np.append(DValuesA, D1)
-        np.append(wValuesA, w)
-        t1 += 0.001
+        mValuesA = np.append(mValuesA, m)
+        DValuesA = np.append(DValuesA, D1)
+        wValuesA = np.append(wValuesA, w)
+        t1 += t_step
 
 
     #Reset initial values (crucial for the cursed K's)
@@ -66,28 +71,30 @@ def CalcLugDim(hinge):
 
     #Solves for bending stress for a range of t values
     while t1 < 0.25:
-        A_frac = 6 / (D1 * (4/(0.5*w-math.sqrt(2)*0.25 * D1) + 2/(0.5*(w-D1)))) # p18 fig D1.15
-        K_bending = 1.2143 * A_frac #Fig D1.15 page 18
+        if w > D1:
+            A_frac = 6 / (D1 * (4/(0.5*w-math.sqrt(2)*0.25 * D1) + 2/(0.5*(w-D1)))) # p18 fig D1.15
+        else:
+            A_frac = 6 / (D1 * (4/(0.5*w-math.sqrt(2)*0.25 * D1) + 2/(0.5*(0.001))))
+        K_bending = 1.3/1.4 * A_frac #Fig D1.15 page 18
         D1 = P[0] / 4 / (K_bending * hinge.sigmaY) / t1 #Bending
-        K_t = -0.05 * w / D1 + 3.05
+        K_t = -0.05 * w / D1 + 3.05 #from appendix A tab D1.3, Curve 1 (W/D up to 3)
         w = (P[1] + F1) * 1.5 / 4 / (K_t * hinge.sigmaY) / t1 + D1
         m = t1 * (w ** 2 - D1 ** 2) #this value is not actually mass, but it is proportional to mass
-        np.append(mValuesB, m)
-        np.append(DValuesB, D1)
-        np.append(wValuesB, w)
-        t1 += 0.001
+        mValuesB = np.append(mValuesB, m)
+        DValuesB = np.append(DValuesB, D1)
+        wValuesB = np.append(wValuesB, w)
+        t1 += t_step
 
-    dTest = (DValuesA > DValuesB)
+    dTest = (DValuesA >= DValuesB)
     mList = [a if c==True else b for a,b,c in zip(mValuesA, mValuesB, dTest)]
-    mMin = min(mList)
-    mMinIndex = mList.index(mMin)
+    mMinIndex = np.argmin(mList)
 
-    if dTest == 1:
-        t1 = mMinIndex * 0.001 + 0.001
+    if dTest[mMinIndex] == 1:
+        t1 = mMinIndex * 0.001 + t1_init
         D1 = DValuesA[mMinIndex]
         w = wValuesA[mMinIndex]
     else:
-        t1 = mMinIndex * 0.001 + 0.001
+        t1 = mMinIndex * 0.001 + t1_init
         D1 = DValuesB[mMinIndex]
         w = wValuesB[mMinIndex]
 
