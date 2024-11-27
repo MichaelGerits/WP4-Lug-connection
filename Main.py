@@ -10,17 +10,13 @@ These are made functions such that they can be ran again through itteration.
 
 The result of each calculation will be Saved in the hinge object, such that one reference poijt exists.
 """
-#initial definition of the hinge obect
-hinge = PD.Hinge(t1=0.001, D1=0.01, w=0.02 ,sigmaY=250000000)
 
 # 4.3------------------------------------------------------------------------------------------------------------------------------------
 
 # Taking values from Loads and giving them nicer names
-F1 = Loads.F1
-P = Loads.P
 
 #Function that actually does the optimising
-def CalcLugDim(t1_init, D1_init, w_init):
+def CalcLugDim(hinge):
     #explaination of what this thing does
     """
     The program runs through a range of values for thickness(t1), and finds hole diameter(D1) and width(w)
@@ -38,10 +34,12 @@ def CalcLugDim(t1_init, D1_init, w_init):
     take these values from.
     """
 
+    P = Loads.P
+    F1 = Loads.F1
     #Declare initial values
-    D1 = D1_init
-    w = w_init
-    t1 = t1_init #m
+    D1 = hinge.D1
+    w = hinge.w
+    t1 = hinge.t1 #m
 
     #Make lists to append bearing values of m, D1, and w to later
     mValuesA, DValuesA, wValuesA = [np.array([])] * 3
@@ -59,9 +57,9 @@ def CalcLugDim(t1_init, D1_init, w_init):
 
 
     #Reset initial values (crucial for the cursed K's)
-    D1 = D1_init
-    w = w_init
-    t1 = t1_init #m
+    D1 = hinge.D1
+    w = hinge.w
+    t1 = hinge.t1 #m
 
     #Make lists to append bending values of m, D1, and w to later
     mValuesB, DValuesB, wValuesB = [np.array([])] * 3
@@ -94,16 +92,15 @@ def CalcLugDim(t1_init, D1_init, w_init):
         w = wValuesB[mMinIndex]
 
     #updates the new values to the hinge object
+    hinge.t1 = t1
     hinge.w = w
     hinge.D1 = D1
-    hinge.t1 = t1
     print(f"t = {t1}", f"hole diameter = {D1}", f"width = {w}")
 #-------------------------------------------------------------------------------------------------------------------------------------------
-#runs the function for the first time
-CalcLugDim(hinge.t1, hinge.D1, hinge.w)
+
 
 #4.4-----------------------------------------------------------------------------------------------------------------
-def CalcBasePlateDim(e1Fac=1.5, e2Fac=1.5, holeSepFac=2.5, fastenerAmount=PD.fastenerAmount, fastenerColumns = PD.fastenerColumns):
+def CalcBasePlateDim(hinge, e1Fac=1.5, e2Fac=1.5, holeSepFac=2.5, fastenerAmount=PD.fastenerAmount, fastenerColumns = PD.fastenerColumns):
     """
     calculates the dimensions of the baseplate with the width and the factors of seperation
     """
@@ -114,21 +111,15 @@ def CalcBasePlateDim(e1Fac=1.5, e2Fac=1.5, holeSepFac=2.5, fastenerAmount=PD.fas
 
     hinge.depth = 2*(2* hinge.e2 + hinge.t1 + fastenerColumns/2 * holeSepFac*hinge.D2) + hinge.h
 #---------------------------------------------------------------------------------------------------------------------------
-#runs the function for the first time
-CalcBasePlateDim()
+
 
 #TODO:calculate h
 #4.5------------------------------------------------------------------------------------------------------------------------
+def CalcFastenerPos(hinge, fastenerAmount = PD.fastenerAmount, columnAmount = PD.fastenerColumns):
+    """
+    calculates the position of the fasteners
+    """
 
-def CalcCG(fastenerAmount = PD.fastenerAmount, columnAmount = PD.fastenerColumns):
-    """
-    calculate the centre of gravity of the fasteners
-    
-    The fasteners are defined first.
-    The locacal coordinate system is the centre of the baseplate
-    
-    an even amount of fasteners is needed
-    """
     #You can fil in a custom amount of fasteners
 
     #initialise the list of fasteners
@@ -152,6 +143,17 @@ def CalcCG(fastenerAmount = PD.fastenerAmount, columnAmount = PD.fastenerColumns
         #add to the list of fasteners
         Fasteners[i] = PD.Fastener(D_h = hinge.D2, xPos=posX, zPos=posZ)
 
+    return Fasteners
+
+def CalcCG(Fasteners):
+    """
+    calculate the centre of gravity of the fasteners
+    
+    The fasteners are defined first.
+    The locacal coordinate system is the centre of the baseplate
+    
+    an even amount of fasteners is needed
+    """
 
     numSum = 0
     denomSum = 0
@@ -175,4 +177,4 @@ def CalcCG(fastenerAmount = PD.fastenerAmount, columnAmount = PD.fastenerColumns
     #calculate CG in Z
     cgZ = numSum/denomSum
 
-    return(cgX, cgZ)
+    return np.array([cgX, cgZ])
