@@ -118,18 +118,73 @@ def CalcLugDim(t1_init, D1_init, w_init):
 CalcLugDim(hinge.t1, hinge.D1, hinge.w)
 
 #4.4-----------------------------------------------------------------------------------------------------------------
-def CalcBasePlateDim(e1Fac=1.5, e2Fac=1.5, holeSepFac=2.5):
+def CalcBasePlateDim(e1Fac=1.5, e2Fac=1.5, holeSepFac=2.5, fastenerAmount=PD.fastenerAmount, fastenerColumns = PD.fastenerColumns):
     """
     calculates the dimensions of the baseplate with the width and the factors of seperation
     """
 
-    hinge.D2 = hinge.w/(2+ 2 * e1Fac + holeSepFac)
+    hinge.D2 = hinge.w/(fastenerAmount/fastenerColumns + 2 * e1Fac + holeSepFac*(fastenerAmount/fastenerColumns-1))
     hinge.e1 = e1Fac*hinge.D2
     hinge.e2 = e2Fac*hinge.D2
 
-    hinge.depth = 2*(2* hinge.e2 + hinge.t1) + hinge.h
+    hinge.depth = 2*(2* hinge.e2 + hinge.t1 + fastenerColumns/2) + hinge.h
 #---------------------------------------------------------------------------------------------------------------------------
 #runs the function for the first time
 CalcBasePlateDim()
 
 #TODO:calculate h
+#4.5------------------------------------------------------------------------------------------------------------------------
+
+def CalcCG(fastenerAmount = PD.fastenerAmount):
+    """
+    calculate the centre of gravity of the fasteners
+    
+    The fasteners are defined first.
+    The locacal coordinate system is the centre of the baseplate
+    
+    an even amount of fasteners is needed
+    """
+    #You can fil in a custom amount of fasteners
+
+    #initialise the list of fasteners
+    Fasteners = list(fastenerAmount)
+
+    #define the list of z positions
+    posZs = np.linspace(hinge.w/2 - hinge.e1, -hinge.w/2 + hinge.e1, fastenerAmount/2)
+
+    #define the fasteners and their positions
+    for i in range(fastenerAmount):
+        #deside on which side the fastener is
+        xSign = 1 if i%2==0 else -1
+
+        #calculate positions
+        posX = xSign * (hinge.depth/4 + hinge.h/4 + hinge.t1/2)
+        posZ = posZs[math.floor(i/2)]
+
+        #add to the list of fasteners
+        Fasteners[i] = PD.Fastener(D_h = hinge.D2, xPos=posX, zPos=posZ)
+
+
+    numSum = 0
+    denomSum = 0
+    for fast in Fasteners:
+        #area of the hole
+        A = fast.D_h**2 * math.pi * 0.25
+        numSum += A * fast.xPos
+        denomSum += A
+    
+    #calculate cg in X
+    cgX = numSum/denomSum
+
+    numSum = 0
+    denomSum = 0
+    for fast in Fasteners:
+        #area of the hole
+        A = fast.D_h**2 * math.pi * 0.25
+        numSum += A * fast.zPos
+        denomSum += A
+
+    #calculate CG in Z
+    cgZ = numSum/denomSum
+
+    return(cgX, cgZ)

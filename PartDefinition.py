@@ -6,6 +6,7 @@ Below the definition goes as follows: A hinge is the entirety and the Lugs are t
 """
 
 fastenerAmount = 4 #the amount of fasteners per Hinge
+fastenerColumns = 2
 
 class Hinge:
     """
@@ -35,7 +36,7 @@ class Fastener:
     define geometry material properties and forces on a bolt
     geometry taken from WP4 p20-21
     """
-    def __init__(self, d_uh_brg=0, L_h=0, D_h=0, d_sha=0, L_n=0, d=0, sw=0, L1=0, L2=0, L3=0, E_b=0, E_n=70e9, G=0, sigmaY=0, rho=0) -> None:
+    def __init__(self, d_uh_brg=0, L_h=0, D_h=0, d_sha=0, L_n=0, d=0, sw=0, L1=0, L2=0, L3=0, E_b=0, E_n=70e9, G=0, sigmaY=0, rho=0, xPos = 0, zPos = 0) -> None:
         self.d_uh_brg = d_uh_brg
         self.L_h = L_h
         self.D_h = D_h
@@ -48,15 +49,18 @@ class Fastener:
         self.L2 = L2
         self.L3 = L3
         self.Lj = L1+L2+L3 #sum of the previous three lengths as per page 21
-        self.L_h_sub = x*d #TODO: decide on nut geometry to find factor
-        self.L_eng_sub = x*d #TODO: decide on nut geometry to find factor Table 7.1 page 22
-        self.L_n_sub = x*d #TODO: decide on nut geometry to find factor
+        #self.L_h_sub = x*d #TODO: decide on nut geometry to find factor
+        #self.L_eng_sub = x*d #TODO: decide on nut geometry to find factor Table 7.1 page 22
+        #self.L_n_sub = x*d #TODO: decide on nut geometry to find factor
 
         self.E_b = E_b
         self.E_n = E_b if E_n==0 else E_n
         self.G = G
         self.sigmaY = sigmaY
         self.rho = rho
+
+        self.xPos = xPos
+        self.zPos = zPos
         pass
 
     def CalcCompliance(self):
