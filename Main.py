@@ -13,7 +13,6 @@ The result of each calculation will be Saved in the hinge object, such that one 
 
 # 4.3------------------------------------------------------------------------------------------------------------------------------------
 
-# Taking values from Loads and giving them nicer names
 
 #Function that actually does the optimising
 def CalcLugDim(hinge):
@@ -36,8 +35,7 @@ def CalcLugDim(hinge):
 
     t_step = 0.0001
 
-    t_step = 0.0001
-
+    # Taking values from Loads and giving them nicer names
     P = Loads.P
     F1 = Loads.F1
     #Declare initial values
@@ -90,11 +88,11 @@ def CalcLugDim(hinge):
     mMinIndex = np.argmin(mList)
 
     if dTest[mMinIndex] == 1:
-        t1 = mMinIndex * 0.001 + t1_init
+        t1 = mMinIndex * 0.001 + hinge.t1
         D1 = DValuesA[mMinIndex]
         w = wValuesA[mMinIndex]
     else:
-        t1 = mMinIndex * 0.001 + t1_init
+        t1 = mMinIndex * 0.001 + hinge.t1
         D1 = DValuesB[mMinIndex]
         w = wValuesB[mMinIndex]
 
