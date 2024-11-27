@@ -5,12 +5,12 @@ import Loads
 
 """
 Below are a list of functions which sequentially calculate the dimensions and the stresses of the hinge
-These are made functions such that they can be ran again through itteration.
+These are made functions such that they can be ran again through iteration.
 
 The result of each calculation will be Saved in the hinge object, such that one reference poijt exists.
 """
 #initial definition of the hinge obect
-hinge = PD.Hinge(t1=0.001, D1=0.01, w=0.02 ,sigmaY=250000000)
+hinge = PD.Hinge(t1=0.0001, D1=0.001, w=0.0003, sigmaY=2.5e6)
 
 # 4.3------------------------------------------------------------------------------------------------------------------------------------
 
@@ -37,24 +37,26 @@ def CalcLugDim(t1_init, D1_init, w_init):
     take these values from.
     """
 
+    t_step = 0.0001
+
     #Declare initial values
-    D1 = D1_init
     w = w_init
     t1 = t1_init #m
 
     #Make lists to append bearing values of m, D1, and w to later
     mValuesA, DValuesA, wValuesA = [np.array([])] * 3
 
+
     #Solves for Bearing stress for a range of t values
     while t1 < 0.25:
         D1 = (P[1] + F1) * 1.5 / 4 / hinge.sigmaY / t1 #Bearing stress (1.5 is MS)
-        K_t = -0.05 * w/D1 + 3.05
+        K_t = -0.05 * w/D1 + 3.05 #from appendix A tab D1.3, Curve 1 (W/D up to 3)
         w = (P[1] + F1) * 1.5 / 4 / (K_t * hinge.sigmaY) / t1 + D1 #Tension of net section
         m = t1 * (w ** 2 - D1 ** 2) #this value is not actually mass, but it is proportional to mass
-        np.append(mValuesA, m)
-        np.append(DValuesA, D1)
-        np.append(wValuesA, w)
-        t1 += 0.001
+        mValuesA = np.append(mValuesA, m)
+        DValuesA = np.append(DValuesA, D1)
+        wValuesA = np.append(wValuesA, w)
+        t1 += t_step
 
 
     #Reset initial values (crucial for the cursed K's)
@@ -67,28 +69,30 @@ def CalcLugDim(t1_init, D1_init, w_init):
 
     #Solves for bending stress for a range of t values
     while t1 < 0.25:
-        A_frac = 6 / (D1 * (4/(0.5*w-math.sqrt(2)*0.25 * D1) + 2/(0.5*(w-D1)))) # p18 fig D1.15
-        K_bending = 1.2143 * A_frac #Fig D1.15 page 18
+        if w > D1:
+            A_frac = 6 / (D1 * (4/(0.5*w-math.sqrt(2)*0.25 * D1) + 2/(0.5*(w-D1)))) # p18 fig D1.15
+        else:
+            A_frac = 6 / (D1 * (4/(0.5*w-math.sqrt(2)*0.25 * D1) + 2/(0.5*(0.001))))
+        K_bending = 1.3/1.4 * A_frac #Fig D1.15 page 18
         D1 = P[0] / 4 / (K_bending * hinge.sigmaY) / t1 #Bending
-        K_t = -0.05 * w / D1 + 3.05
+        K_t = -0.05 * w / D1 + 3.05 #from appendix A tab D1.3, Curve 1 (W/D up to 3)
         w = (P[1] + F1) * 1.5 / 4 / (K_t * hinge.sigmaY) / t1 + D1
         m = t1 * (w ** 2 - D1 ** 2) #this value is not actually mass, but it is proportional to mass
-        np.append(mValuesB, m)
-        np.append(DValuesB, D1)
-        np.append(wValuesB, w)
-        t1 += 0.001
+        mValuesB = np.append(mValuesB, m)
+        DValuesB = np.append(DValuesB, D1)
+        wValuesB = np.append(wValuesB, w)
+        t1 += t_step
 
-    dTest = (DValuesA > DValuesB)
+    dTest = (DValuesA >= DValuesB)
     mList = [a if c==True else b for a,b,c in zip(mValuesA, mValuesB, dTest)]
-    mMin = min(mList)
-    mMinIndex = mList.index(mMin)
+    mMinIndex = np.argmin(mList)
 
-    if dTest == 1:
-        t1 = mMinIndex * 0.001 + 0.001
+    if dTest[mMinIndex] == 1:
+        t1 = mMinIndex * 0.001 + t1_init
         D1 = DValuesA[mMinIndex]
         w = wValuesA[mMinIndex]
     else:
-        t1 = mMinIndex * 0.001 + 0.001
+        t1 = mMinIndex * 0.001 + t1_init
         D1 = DValuesB[mMinIndex]
         w = wValuesB[mMinIndex]
 
@@ -96,10 +100,10 @@ def CalcLugDim(t1_init, D1_init, w_init):
     hinge.w = w
     hinge.D1 = D1
     hinge.t1 = t1
-    print(f"t = {t1}", f"hole diameter = {D1}", f"width = {w}")
 #-------------------------------------------------------------------------------------------------------------------------------------------
 #runs the function for the first time
 CalcLugDim(hinge.t1, hinge.D1, hinge.w)
+print(f"t = {hinge.t1}", f"hole diameter = {hinge.D1}", f"width = {hinge.w}")
 
 #4.4-----------------------------------------------------------------------------------------------------------------
 def CalcBasePlateDim(e1Fac=1.5, e2Fac=1.5, holeSepFac=2.5, fastenerAmount=PD.fastenerAmount, fastenerColumns = PD.fastenerColumns):

@@ -6,10 +6,10 @@ This document includes the loads and force calculations
 """
 
 #resulting force [Px, Py, Pz]
-P = np.zeros(3) #if a component is zero, take 10% of the total
+P = [538.6, 538.6, 1795] #N #if a component is zero, take 10% of the total
 
 #resulting Moment [Mx, My, Mz]
-T = np.zeros(3)
+T = [430, 0, 129] #Nm #My coming soon
 
 H = 0.4  #m
 
