@@ -3,6 +3,7 @@ import numpy as np
 import PartDefinition as PD
 import Loads
 import itertools
+import Itteration
 
 """
 Below are a list of functions which sequentially calculate the dimensions and the stresses of the hinge
@@ -234,9 +235,9 @@ def CalcFastenerPos(hinge, fastenerAmount = PD.fastenerAmount, columnAmount = PD
     Fasteners = [] * fastenerAmount
 
     #define the list of z positions
-    posZs = np.linspace((hinge.w/2 - hinge.e1), (-hinge.w/2 + hinge.e1), (fastenerAmount/columnAmount))
+    posZs = np.linspace((hinge.w/2 - hinge.e1), (-hinge.w/2 + hinge.e1), int(fastenerAmount/columnAmount))
     #ceates the positive x positions
-    posXs = np.linspace((hinge.depth/2 - hinge.e2), (hinge.t1 + hinge.h/2 + hinge.e2), columnAmount/2)
+    posXs = np.linspace((hinge.depth/2 - hinge.e2), (hinge.t1 + hinge.h/2 + hinge.e2), int(columnAmount/2))
     #mirrors for the negative x positions
     posXs = np.append(posX, -posX[::-1])
     #creates a list with all the positions
@@ -286,3 +287,59 @@ def CalcCG(Fasteners):
     cgZ = numSum/denomSum
 
     return np.array([cgX, cgZ])
+
+#4.6----------------------------------------------------------
+def CalcCGForces(Fasteners, CG):
+    """
+    Calculates the forces on each fastener
+    """
+    Fx, Fz = Loads.P[0], Loads.P[2]
+
+    #Force on the cg
+    Fcg = np.array([Fx, Fz])
+    #Due to the definition of the axis system and the fact that the fastener pattern is symmetrical, there is no resulting moment at the CG of the fasteners, but this is calculated regardless
+    FastenerLoads = np.empty(len(Fasteners))
+
+    #moment on the cg
+    Mycg = np.cross(CG, Fcg)
+
+    #get the sum of the area and distance to calculate the moment load later on
+    Sum = 0
+    for Fast in Fasteners:
+        posi = np.array([Fast.xPos, Fast.zPos])
+        di = posi - CG
+        Sum += Fast.D_h**2 * math.pi * 0.25 * (di**2)    
+
+
+    #Calculate the loads on each fasteners
+    i=0
+    for Fast in Fasteners:
+        load = np.zeros(3)
+        pos = np.array([Fast.xPos, Fast.zPos])
+        d = pos - CG
+
+        load[0:2] = Fcg/(len(Fasteners))
+        load[2] = (Mycg * Fast.D_h**2 * math.pi * 0.25 * d)/Sum
+
+        #saves the load vector to the fastener object
+        Fast.loadsInPlane = load
+        FastenerLoads[i] = load
+        i+=1
+    #returns the loads as a matrix for debugging
+    return FastenerLoads
+    
+#4.7-------------------------------------------------------------------------
+def CheckBearing(hinge, Fasteners):
+    for Fast in Fasteners:
+        P = np.linalg.norm(Fast.loadsInPlane)
+        if P/(hinge.D2*hinge.t2) > hinge.SigmaB:
+            return False
+        
+    return True
+
+
+#4.8-----------------------------------------------------------------------------------------------------------------
+
+#this function calculates the load that could push or pull the fasteners through
+def calcPullThroughLoad(yforce, zmoment, xpos, zpos):
+    pullforce = yforce/len(Itteration.Fasteners)

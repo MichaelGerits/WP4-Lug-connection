@@ -14,7 +14,7 @@ class Hinge:
     define the geometry and materials properties of the Hinge
     as well as any calculation
     """
-    def __init__(self, h=Loads.H/3, w=0, D1=0, D2=0, t1=0, t2=0, e1=0, e2=0, E=70e9, G=0, rho=0, sigmaY=0, depth=0) -> None:
+    def __init__(self, h=Loads.H/3, w=0, D1=0, D2=0, t1=0, t2=0, e1=0, e2=0, E=70e9, G=0, rho=0, sigmaY=0, SigmaB=0, depth=0) -> None:
         self.h = h
         self.D1 = D1
         self.D2 = D2
@@ -29,6 +29,7 @@ class Hinge:
         self.G = G
         self.rho = rho
         self.sigmaY = sigmaY
+        self.SigmaB = SigmaB
         pass
 
 class Fastener:
@@ -61,6 +62,8 @@ class Fastener:
 
         self.xPos = xPos
         self.zPos = zPos
+
+        self.loadsInPlane = np.empty(3) #due to Fx, due to Fz, due to My
         pass
 
     def CalcCompliance(self):
