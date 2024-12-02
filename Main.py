@@ -1,5 +1,6 @@
 import math
 import numpy as np
+import scipy
 import PartDefinition as PD
 import Loads
 import itertools
@@ -14,94 +15,32 @@ The result of each calculation will be Saved in the hinge object, such that one 
 
 # 4.3------------------------------------------------------------------------------------------------------------------------------------
 
+def CalcLugDimTwo(hinge):
+    resulto = scipy.optimize.minimize(CalcLugDimThree, [0.01, 0.01, 0.02], bounds=scipy.optimize.Bounds([0.001, 0.001, 0.002], [0.25, 0.5, 0.5]))
+    print(resulto)
+    hinge.t1 = resulto.x[0]
+    hinge.w = resulto.x[1]
+    hinge.D1 = resulto.x[2]
 
-#Function that actually does the optimising
-def CalcLugDim(hinge):
-    #explaination of what this thing does
-    """
-    The program runs through a range of values for thickness(t1), and finds hole diameter(D1) and width(w)
-    that will meet the bearing and bending stress (hence the two different for loops. one checks for
-    bearing, the other for bending. Then, the code finds a "mass(m)" that isnt really mass, but this value
-    is proportional to mass. Thus, this value takes on a minimum when mass is a minimum.
-    The equations show that D1 is inversely proportional to both bearing stress and bending stress, for
-    constant w and t1. So, the optimiser finds both values of D1 for a given t, and puts the resulting tuples
-    in a list(dList) along with their corresponding masses. An if statement checks which one is bigger, and
-    appends either an A or a B. Then, a list(mList) is created with the corresponding m values. i.e. if the
-    D1 required for bearing is bigger than the D1 required for bending, then an A is appended, and mList
-    contains the m from the first for loop.
-    The minimum(mMin) m from mList is used as the optimal value. The index(mMinIndex) of this minimum is
-    used to find the optimal t, D1, and w values. The A or B appended earlier helps find out which list to
-    take these values from.
-    """
 
-    t_step = 0.0001
-
-    # Taking values from Loads and giving them nicer names
+def CalcLugDimThree(arr):
+    t1, D1, w = arr
     P = Loads.P
     F1 = Loads.F1
-    #Declare initial values
-    D1 = hinge.D1
-    w = hinge.w
-    t1 = hinge.t1 #m
+    sigma = 4.14e7
 
-    #Make lists to append bearing values of m, D1, and w to later
-    mValuesA, DValuesA, wValuesA = [np.array([])] * 3
+    A_frac = 6 / (D1 * (4 / (0.5 * w - math.sqrt(2) * 0.25 * D1) + 2 / (0.5 * (w - D1))))  # p18 fig D1.15
+    K_bending = 1.3 / 1.4 * A_frac  # Fig D1.15 page 18
+    K_t = -0.05 * w / D1 + 3.05  # from appendix A tab D1.3, Curve 1 (W/D up to 3)
+    check1 = 4 * K_bending * D1 * t1 * sigma
+    check2 = 4 * K_t * sigma * t1 * (w - D1)
 
-
-    #Solves for Bearing stress for a range of t values
-    while t1 < 0.25:
-        D1 = (P[1] + F1) * 1.5 / 4 / hinge.sigmaY / t1 #Bearing stress (1.5 is MS)
-        K_t = -0.05 * w/D1 + 3.05 #from appendix A tab D1.3, Curve 1 (W/D up to 3)
-        w = (P[1] + F1) * 1.5 / 4 / (K_t * hinge.sigmaY) / t1 + D1 #Tension of net section
-        m = t1 * (w ** 2 - D1 ** 2) #this value is not actually mass, but it is proportional to mass
-        mValuesA = np.append(mValuesA, m)
-        DValuesA = np.append(DValuesA, D1)
-        wValuesA = np.append(wValuesA, w)
-        t1 += t_step
-
-
-    #Reset initial values (crucial for the cursed K's)
-    D1 = hinge.D1
-    w = hinge.w
-    t1 = hinge.t1 #m
-
-    #Make lists to append bending values of m, D1, and w to later
-    mValuesB, DValuesB, wValuesB = [np.array([])] * 3
-
-    #Solves for bending stress for a range of t values
-    while t1 < 0.25:
-        if w > D1:
-            A_frac = 6 / (D1 * (4/(0.5*w-math.sqrt(2)*0.25 * D1) + 2/(0.5*(w-D1)))) # p18 fig D1.15
-        else:
-            A_frac = 6 / (D1 * (4/(0.5*w-math.sqrt(2)*0.25 * D1) + 2/(0.5*(0.001))))
-        K_bending = 1.3/1.4 * A_frac #Fig D1.15 page 18
-        D1 = P[0] / 4 / (K_bending * hinge.sigmaY) / t1 #Bending
-        K_t = -0.05 * w / D1 + 3.05 #from appendix A tab D1.3, Curve 1 (W/D up to 3)
-        w = (P[1] + F1) * 1.5 / 4 / (K_t * hinge.sigmaY) / t1 + D1
-        m = t1 * (w ** 2 - D1 ** 2) #this value is not actually mass, but it is proportional to mass
-        mValuesB = np.append(mValuesB, m)
-        DValuesB = np.append(DValuesB, D1)
-        wValuesB = np.append(wValuesB, w)
-        t1 += t_step
-
-    dTest = (DValuesA >= DValuesB)
-    mList = [a if c==True else b for a,b,c in zip(mValuesA, mValuesB, dTest)]
-    mMinIndex = np.argmin(mList)
-
-    if dTest[mMinIndex] == 1:
-        t1 = mMinIndex * 0.001 + hinge.t1
-        D1 = DValuesA[mMinIndex]
-        w = wValuesA[mMinIndex]
+    if check1 > P[0] * 1.5 and check2 > (P[1] + F1) * 1.5 and w > D1 + t1:
+        return t1 * math.pi * (w ** 2 - D1 ** 2) / 4
     else:
-        t1 = mMinIndex * 0.001 + hinge.t1
-        D1 = DValuesB[mMinIndex]
-        w = wValuesB[mMinIndex]
+        return 31415
 
-    #updates the new values to the hinge object
-    hinge.t1 = t1
-    hinge.w = w
-    hinge.D1 = D1
-    print(f"t = {t1}", f"hole diameter = {D1}", f"width = {w}")
+
 #-------------------------------------------------------------------------------------------------------------------------------------------
 
 
@@ -111,11 +50,11 @@ def CalcBasePlateDim(hinge, e1Fac=1.5, e2Fac=1.5, holeSepFac=2.5, fastenerAmount
     calculates the dimensions of the baseplate with the width and the factors of seperation
     """
 
-    hinge.D2 = hinge.w/(fastenerAmount/fastenerColumns + 2 * e1Fac + holeSepFac*(fastenerAmount/fastenerColumns-1))
+    hinge.D2 = hinge.w/(2 * e1Fac + holeSepFac*(fastenerAmount/fastenerColumns-1))
     hinge.e1 = e1Fac*hinge.D2
     hinge.e2 = e2Fac*hinge.D2
 
-    hinge.depth = 2*(2* hinge.e2 + hinge.t1 + fastenerColumns/2 * holeSepFac*hinge.D2) + hinge.h
+    hinge.depth = 2*(2* hinge.e2 + hinge.t1 + (fastenerColumns/2 - 1) * holeSepFac*hinge.D2) + hinge.h
 #---------------------------------------------------------------------------------------------------------------------------
 
 
@@ -227,12 +166,19 @@ def CalcCGForces(Fasteners, CG):
     
 #4.7-------------------------------------------------------------------------
 def CheckBearing(hinge, Fasteners):
+    result = (1,1)
     for Fast in Fasteners:
         P = np.linalg.norm(Fast.loadsInPlane)
+
+        #bearing check for the baseplate thickness
         if P/(hinge.D2*hinge.t2) > hinge.SigmaB:
-            return False
+            result[0] = 0
+
+        #bearing check for the spacecraft wall
+        if P/(hinge.D2*hinge.t3) > hinge.SigmaB:
+            result[1] = 0
         
-    return True
+    return result
 
 
 #4.8-----------------------------------------------------------------------------------------------------------------
