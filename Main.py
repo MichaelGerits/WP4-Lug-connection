@@ -219,3 +219,9 @@ def CalcCGForces(hinge, Fasteners, CG):
 
         Fast.load = load
         FastenerLoads[i] = load
+
+#4.8-----------------------------------------------------------------------------------------------------------------
+
+#this function calculates the load that could push or pull the fasteners through
+def calcPullThroughLoad(yforce, zmoment, xpos, zpos):
+    pullforce = yforce/len(Itteration.Fasteners)
