@@ -13,8 +13,8 @@ Fasteners = Main.CalcFastenerPos(hinge)
 FastCG = Main.CalcCG(Fasteners)
 Main.CalcCGForces(Fasteners, FastCG)
 
-BearingCheck = Main.CheckBearing(hinge, Fasteners)
+BearingCheckH, BearingCheckW = Main.CheckBearing(hinge,Fasteners)
 #if bearingcheck returns false, we should increase the thickness
-while BearingCheck == False:
+while BearingCheckH == False or BearingCheckW == False:
     hinge.t2 += 0.001
     BearingCheck(hinge, Fasteners)
