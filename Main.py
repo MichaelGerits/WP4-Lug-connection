@@ -184,8 +184,8 @@ def CalcCG(Fasteners):
 
     return np.array([cgX, cgZ])
 
-#--------------------------4.6----------------------------------------
-def CalcCGForces(hinge, Fasteners, CG):
+#4.6----------------------------------------------------------
+def CalcCGForces(Fasteners, CG):
     """
     Calculates the forces on each fastener
     """
@@ -217,8 +217,22 @@ def CalcCGForces(hinge, Fasteners, CG):
         load[0:2] = Fcg/(len(Fasteners))
         load[2] = (Mycg * Fast.D_h**2 * math.pi * 0.25 * d)/Sum
 
-        Fast.load = load
+        #saves the load vector to the fastener object
+        Fast.loadsInPlane = load
         FastenerLoads[i] = load
+        i+=1
+    #returns the loads as a matrix for debugging
+    return FastenerLoads
+    
+#4.7-------------------------------------------------------------------------
+def CheckBearing(hinge, Fasteners):
+    for Fast in Fasteners:
+        P = np.linalg.norm(Fast.loadsInPlane)
+        if P/(hinge.D2*hinge.t2) > hinge.SigmaB:
+            return False
+        
+    return True
+
 
 #4.8-----------------------------------------------------------------------------------------------------------------
 
