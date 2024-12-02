@@ -183,17 +183,22 @@ def CheckBearing(hinge, Fasteners):
 
 #4.8-----------------------------------------------------------------------------------------------------------------
 
-#this function calculates the load that could push or pull the fasteners through
+"""this function calculates the load that could push or pull the fasteners through, the pull through force is composed of the force in y direction (force acting along the center
+of the bolt) and the moment around the z axis. The load on each bolt due to the force in y direction is equal for every bolt and is simply the force in y direction divided
+by the number of bolts. The moment depends on the position of the fastener so it needs to be determined for each fastener separately. For this the below function will iterate 
+through all fasteners, and return a list of the loads on all the fasteners."""
+
 def calcPullThroughLoad(yforce, zmoment, Fasteners):
-    pullforce = yforce/len(Fasteners)
-    cg =CalcCG(Fasteners)
-    Sum = 0
-    for fastener in Fasteners:
+    pullforce = yforce/len(Fasteners)   #calculate force on each bolt due the force in y direction
+    cg =CalcCG(Fasteners)   #calculate the cg of all the fasteners
+    Sum = 0     #initialise variable for the sum
+    for fastener in Fasteners:  #iterate through all fasteners, find their distance to cg and sum up their area times the square of their distance
         posi = np.array([fastener.xPos, fastener.zPos])
         di = posi - cg
         Sum += fastener.D_h**2 * math.pi * 0.25 * (di**2)
-    loads = []
-    for fastener in Fasteners:
+
+    loads = []  #empty list for the loads
+    for fastener in Fasteners:  #iterate through fasteners again and determine the force due to the moment and its sign, add it to list
         momentload = zmoment * fastener.D_h**2 * math.pi * math.sqrt((fastener.xPos - cg[0])**2+(fastener.zPos - cg[1])**2) / Sum
         if fastener.zPos >= 0:
             loads.append(-momentload)
@@ -201,4 +206,13 @@ def calcPullThroughLoad(yforce, zmoment, Fasteners):
             loads.append(momentload)
     for load in loads:
         load = load + pullforce
-    return loads
+
+    return loads    #return loads
+
+#4.9---------------------------------------------------------------------------------------------------------------------
+
+#the tensile stress acts on the area where the bold head touches the skin
+def pullThroughTest(dboltouter, dboltinner, load, t2, t3):
+    areabolthead = (dboltouter/2)**2 * math.pi - (dboltinner/2)**2 * math.pi
+    sigmay = load/areabolthead
+    
