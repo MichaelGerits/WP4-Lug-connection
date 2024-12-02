@@ -9,7 +9,7 @@ This document includes the loads and force calculations
 P = [538.6, 538.6, 1795] #N #if a component is zero, take 10% of the total
 
 #resulting Moment [Mx, My, Mz]
-T = [430, 0, 129] #Nm #My coming soon
+T = [430, 0, 129] #Nm #TODO: My coming soon
 
 H = 0.4  #m
 

@@ -183,3 +183,39 @@ def CalcCG(Fasteners):
     cgZ = numSum/denomSum
 
     return np.array([cgX, cgZ])
+
+#--------------------------4.6----------------------------------------
+def CalcCGForces(hinge, Fasteners, CG):
+    """
+    Calculates the forces on each fastener
+    """
+    Fx, Fz = Loads.P[0], Loads.P[2]
+
+    #Force on the cg
+    Fcg = np.array([Fx, Fz])
+    #Due to the definition of the axis system and the fact that the fastener pattern is symmetrical, there is no resulting moment at the CG of the fasteners, but this is calculated regardless
+    FastenerLoads = np.empty(len(Fasteners))
+
+    #moment on the cg
+    Mycg = np.cross(CG, Fcg)
+
+    #get the sum of the area and distance to calculate the moment load later on
+    Sum = 0
+    for Fast in Fasteners:
+        posi = np.array([Fast.xPos, Fast.zPos])
+        di = posi - CG
+        Sum += Fast.D_h**2 * math.pi * 0.25 * (di**2)    
+
+
+    #Calculate the loads on each fasteners
+    i=0
+    for Fast in Fasteners:
+        load = np.zeros(3)
+        pos = np.array([Fast.xPos, Fast.zPos])
+        d = pos - CG
+
+        load[0:2] = Fcg/(len(Fasteners))
+        load[2] = (Mycg * Fast.D_h**2 * math.pi * 0.25 * d)/Sum
+
+        Fast.load = load
+        FastenerLoads[i] = load

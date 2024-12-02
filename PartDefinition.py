@@ -61,6 +61,8 @@ class Fastener:
 
         self.xPos = xPos
         self.zPos = zPos
+
+        self.load = np.empty(3)
         pass
 
     def CalcCompliance(self):
