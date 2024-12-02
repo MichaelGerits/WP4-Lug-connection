@@ -9,7 +9,7 @@ import numpy as np
 hinge = PD.Hinge(t1=0.001, t2=0.01, t3=0.01, D1=0.01, w=0.02, sigmaY=250000000)
 
 #runs the functions for the first time
-Main.CalcLugDimTwo(hinge)
+Main.CalcLugDimOne(hinge)
 Main.CalcBasePlateDim(hinge)
 Fasteners = Main.CalcFastenerPos(hinge)
 FastCG = Main.CalcCG(Fasteners)
