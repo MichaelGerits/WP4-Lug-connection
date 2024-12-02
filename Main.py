@@ -131,9 +131,9 @@ def CalcFastenerPos(hinge, fastenerAmount = PD.fastenerAmount, columnAmount = PD
     Fasteners = [] * fastenerAmount
 
     #define the list of z positions
-    posZs = np.linspace((hinge.w/2 - hinge.e1), (-hinge.w/2 + hinge.e1), (fastenerAmount/columnAmount))
+    posZs = np.linspace((hinge.w/2 - hinge.e1), (-hinge.w/2 + hinge.e1), int(fastenerAmount/columnAmount))
     #ceates the positive x positions
-    posXs = np.linspace((hinge.depth/2 - hinge.e2), (hinge.t1 + hinge.h/2 + hinge.e2), columnAmount/2)
+    posXs = np.linspace((hinge.depth/2 - hinge.e2), (hinge.t1 + hinge.h/2 + hinge.e2), int(columnAmount/2))
     #mirrors for the negative x positions
     posXs = np.append(posX, -posX[::-1])
     #creates a list with all the positions
