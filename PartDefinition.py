@@ -14,12 +14,13 @@ class Hinge:
     define the geometry and materials properties of the Hinge
     as well as any calculation
     """
-    def __init__(self, h=Loads.H/3, w=0, D1=0, D2=0, t1=0, t2=0, e1=0, e2=0, E=70e9, G=0, rho=0, sigmaY=0, SigmaB=0, depth=0) -> None:
+    def __init__(self, h=Loads.H/3, w=0, D1=0, D2=0, t1=0, t2=0, t3=0, e1=0, e2=0, E=70e9, G=0, rho=0, sigmaY=0, SigmaB=0, depth=0) -> None:
         self.h = h
         self.D1 = D1
         self.D2 = D2
         self.t1 = t1
         self.t2 = t2
+        self.t3 = t3
         self.e1 = e1 #limits depending on the material choice
         self.e2 = e2
         self.w = w
