@@ -3,7 +3,6 @@ import numpy as np
 import PartDefinition as PD
 import Loads
 import itertools
-import Itteration
 
 """
 Below are a list of functions which sequentially calculate the dimensions and the stresses of the hinge
