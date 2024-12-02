@@ -238,5 +238,21 @@ def CheckBearing(hinge, Fasteners):
 #4.8-----------------------------------------------------------------------------------------------------------------
 
 #this function calculates the load that could push or pull the fasteners through
-def calcPullThroughLoad(yforce, zmoment, xpos, zpos):
-    pullforce = yforce/len(Itteration.Fasteners)
+def calcPullThroughLoad(yforce, zmoment, Fasteners):
+    pullforce = yforce/len(Fasteners)
+    cg =CalcCG(Fasteners)
+    Sum = 0
+    for fastener in Fasteners:
+        posi = np.array([fastener.xPos, fastener.zPos])
+        di = posi - cg
+        Sum += fastener.D_h**2 * math.pi * 0.25 * (di**2)
+    loads = []
+    for fastener in Fasteners:
+        momentload = zmoment * fastener.D_h**2 * math.pi * math.sqrt((fastener.xPos - cg[0])**2+(fastener.zPos - cg[1])**2) / Sum
+        if fastener.zPos >= 0:
+            loads.append(-momentload)
+        else:
+            loads.append(momentload)
+    for load in loads:
+        load = load + pullforce
+    return loads
