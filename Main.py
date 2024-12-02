@@ -1,5 +1,6 @@
 import math
 import numpy as np
+import scipy
 import PartDefinition as PD
 import Loads
 import itertools
@@ -102,6 +103,31 @@ def CalcLugDim(hinge):
     hinge.w = w
     hinge.D1 = D1
     print(f"t = {t1}", f"hole diameter = {D1}", f"width = {w}")
+
+def CalcLugDimTwo(hinge):
+    resulto = scipy.optimize.minimize(CalcLugDimThree, [0.01, 0.01, 0.02], bounds=scipy.optimize.Bounds([0.001, 0.001, 0.002], [0.25, 0.5, 0.5]))
+    print(resulto)
+    hinge.t1 = resulto.x[0]
+    hinge.w = resulto.x[1]
+    hinge.D1 = resulto.x[2]
+def CalcLugDimThree(arr):
+    t1, D1, w = arr
+    P = Loads.P
+    F1 = Loads.F1
+    sigma = 4.14e7
+
+    A_frac = 6 / (D1 * (4 / (0.5 * w - math.sqrt(2) * 0.25 * D1) + 2 / (0.5 * (w - D1))))  # p18 fig D1.15
+    K_bending = 1.3 / 1.4 * A_frac  # Fig D1.15 page 18
+    K_t = -0.05 * w / D1 + 3.05  # from appendix A tab D1.3, Curve 1 (W/D up to 3)
+    check1 = 4 * K_bending * D1 * t1 * sigma
+    check2 = 4 * K_t * sigma * t1 * (w - D1)
+
+    if check1 > P[0] * 1.5 and check2 > (P[1] + F1) * 1.5 and w > D1 + t1:
+        return t1 * math.pi * (w ** 2 - D1 ** 2) / 4
+    else:
+        return 31415
+
+
 #-------------------------------------------------------------------------------------------------------------------------------------------
 
 
