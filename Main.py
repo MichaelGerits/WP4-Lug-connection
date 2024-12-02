@@ -128,7 +128,7 @@ def CalcFastenerPos(hinge, fastenerAmount = PD.fastenerAmount, columnAmount = PD
     #You can fil in a custom amount of fasteners
 
     #initialise the list of fasteners
-    Fasteners = list(fastenerAmount)
+    Fasteners = [] * fastenerAmount
 
     #define the list of z positions
     posZs = np.linspace((hinge.w/2 - hinge.e1), (-hinge.w/2 + hinge.e1), (fastenerAmount/columnAmount))
