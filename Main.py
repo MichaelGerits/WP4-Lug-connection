@@ -215,4 +215,8 @@ def calcPullThroughLoad(yforce, zmoment, Fasteners):
 def pullThroughTest(dboltouter, dboltinner, load, t2, t3):
     areabolthead = (dboltouter/2)**2 * math.pi - (dboltinner/2)**2 * math.pi
     sigmay = load/areabolthead
+    areat2 = math.pi * dboltouter * t2
+    areat3 = math.pi * dboltouter * t3
+    tau2 = load/areat2
+    tau3 = load/areat3
     
