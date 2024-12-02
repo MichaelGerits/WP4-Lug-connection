@@ -15,15 +15,15 @@ The result of each calculation will be Saved in the hinge object, such that one 
 
 # 4.3------------------------------------------------------------------------------------------------------------------------------------
 
-def CalcLugDimTwo(hinge):
-    resulto = scipy.optimize.minimize(CalcLugDimThree, [0.01, 0.01, 0.02], bounds=scipy.optimize.Bounds([0.001, 0.001, 0.002], [0.25, 0.5, 0.5]))
+def CalcLugDimOne(hinge):
+    resulto = scipy.optimize.minimize(CalcLugDimTwo, [0.01, 0.01, 0.02], bounds=scipy.optimize.Bounds([0.001, 0.001, 0.002], [0.25, 0.5, 0.5]))
     print(resulto)
     hinge.t1 = resulto.x[0]
     hinge.w = resulto.x[1]
     hinge.D1 = resulto.x[2]
 
 
-def CalcLugDimThree(arr):
+def CalcLugDimTwo(arr):
     t1, D1, w = arr
     P = Loads.P
     F1 = Loads.F1
