@@ -110,6 +110,8 @@ def CalcLugDimTwo(hinge):
     hinge.t1 = resulto.x[0]
     hinge.w = resulto.x[1]
     hinge.D1 = resulto.x[2]
+
+
 def CalcLugDimThree(arr):
     t1, D1, w = arr
     P = Loads.P
