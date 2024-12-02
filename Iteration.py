@@ -11,6 +11,7 @@ Main.CalcBasePlateDim(hinge)
 Fasteners = Main.CalcFastenerPos(hinge)
 FastCG = Main.CalcCG(Fasteners)
 Main.CalcCGForces(Fasteners, FastCG)
+
 BearingCheck = Main.CheckBearing(hinge,Fasteners)
 #if bearingcheck returns false, we should increase the thickness
 while BearingCheck == False:
