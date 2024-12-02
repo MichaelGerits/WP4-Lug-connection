@@ -184,7 +184,7 @@ def CalcCG(Fasteners):
 
     return np.array([cgX, cgZ])
 
-#--------------------------4.6----------------------------------------
+#4.6----------------------------------------------------------
 def CalcCGForces(hinge, Fasteners, CG):
     """
     Calculates the forces on each fastener
