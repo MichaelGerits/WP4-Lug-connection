@@ -233,10 +233,10 @@ def pullThroughTest(dboltouter, dboltinner, load, t2, t3, yieldstress):
         return False
 
 #4.10--------------------------------------------------------------------------
-def CalcComplianceA(hinge, t):
+def CalcComplianceA(hinge, t, Fast):
     """
     calculates the compliance of the sheet that it is conneted to the fastener
     """
-    delA = 4*t /()
+    delA = (4* t *hinge.E)/(math.pi*(Fast.D_fo**2 - Fast.D_fi**2)) #assume the youngs modulus is similar to the backplate one
     
     return delA 

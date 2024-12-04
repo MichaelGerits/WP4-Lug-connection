@@ -23,3 +23,7 @@ while 0 in checkResult:
     hinge.t2 += updateVal[0]
     hinge.t3 += updateVal[1]
     checkResult = Main.CheckBearing(hinge, Fasteners)
+
+DelA_bp = Main.CalcComplianceA(hinge, hinge.t2, Fasteners[0]) #calculate the compliance of the backplate and the spacecraft wall
+DelA_w = Main.CalcComplianceA(hinge, hinge.t3, Fasteners[0]) #calculate the compliance of the backplate and the spacecraft wall
+
