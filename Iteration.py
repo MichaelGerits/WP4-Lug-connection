@@ -8,22 +8,30 @@ hinge = PD.Hinge(t1=0.001, t2=0.005, t3=0.005, D1=0.01, w=0.02, sigmaY=4.14e7, S
 
 # runs the functions for the first time
 Main.CalcLugDimOne(hinge)
-print("finishedCalclugdim\n")
 Main.CalcBasePlateDim(hinge)
 Fasteners = Main.CalcFastenerPos(hinge)
 FastCG = Main.CalcCG(Fasteners)
 Main.CalcCGForces(Fasteners, FastCG)
-print("Bearingcheck")
+
+#if bearingcheck returns false, we should increase the thickness
 checkResult = Main.CheckBearing(hinge,Fasteners)
 print(checkResult)
-#if bearingcheck returns false, we should increase the thickness
 while 0 in checkResult:
-    print(checkResult)
     updateVal = np.abs(np.array(checkResult) - 1) * 0.001
     hinge.t2 += updateVal[0]
     hinge.t3 += updateVal[1]
     checkResult = Main.CheckBearing(hinge, Fasteners)
+    print(checkResult)
 
+#Pullthrough check
+Main.calcPullThroughLoad(Fasteners)
+checkResult = Main.CheckPullThrough(Fasteners, hinge)
+print(checkResult)
+while 0 in checkResult:
+    hinge.t2 += 0.0005
+    hinge.t3 += 0.0005
+    checkResult = Main.CheckPullThrough(Fasteners, hinge)
+    print(checkResult)
 """
 calculate some lengths of the fasteners
 """

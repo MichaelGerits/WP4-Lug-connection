@@ -46,7 +46,7 @@ def CalcLugDimTwo(arr):
 
 
 #4.4-----------------------------------------------------------------------------------------------------------------
-def CalcBasePlateDim(hinge, e1Fac=1.5, e2Fac=1.5, holeSepFac=2.5, fastenerAmount=PD.fastenerAmount, fastenerColumns = PD.fastenerColumns):
+def CalcBasePlateDim(hinge, e1Fac=1.5, e2Fac=1.5, holeSepFac=2, fastenerAmount=PD.fastenerAmount, fastenerColumns = PD.fastenerColumns):
     """
     calculates the dimensions of the baseplate with the width and the factors of seperation
     """
@@ -86,7 +86,7 @@ def CalcFastenerPos(hinge, fastenerAmount = PD.fastenerAmount, columnAmount = PD
         posX, posZ = posTup[i]
 
         #add to the list of fasteners
-        Fasteners[i] = PD.Fastener(D_h = hinge.D2, xPos=posX, zPos=posZ)
+        Fasteners[i] = PD.Fastener(d_uh_brg = 0.005, D_h = hinge.D2, xPos=posX, zPos=posZ)
 
     return Fasteners
 
@@ -186,22 +186,23 @@ of the bolt) and the moment around the z axis. The load on each bolt due to the 
 by the number of bolts. The moment depends on the position of the fastener so it needs to be determined for each fastener separately. For this the below function will iterate 
 through all fasteners, and return a list of the loads on all the fasteners."""
 
-def calcPullThroughLoad(yforce, zmoment, Fasteners):
-    pullforce = yforce/len(Fasteners)   #calculate force on each bolt due the force in y direction
+def calcPullThroughLoad(Fasteners):
+    pullforce = Loads.P[1]/len(Fasteners)
+    #calculate force on each bolt due the force in y direction
     cg =CalcCG(Fasteners)   #calculate the cg of all the fasteners
     Sum = 0     #initialise variable for the sum
     for fastener in Fasteners:  #iterate through all fasteners, find their distance to cg and sum up their area times the square of their distance
         posi = np.array([fastener.xPos, fastener.zPos])
         di = posi - cg
-        Sum += fastener.D_h**2 * math.pi * 0.25 * (di**2)
+        Sum += fastener.D_h**2 * math.pi * 0.25 * (np.linalg.norm(di)**2)
 
     for fastener in Fasteners:  #iterate through fasteners again and determine the force due to the moment and its sign and edit the out of plane force for each fastener
-        momentload = zmoment * fastener.D_h**2 * math.pi * math.sqrt((fastener.xPos - cg[0])**2+(fastener.zPos - cg[1])**2) / Sum
+        momentload = Loads.T[2] * fastener.D_h**2 * math.pi * math.sqrt((fastener.xPos - cg[0])**2+(fastener.zPos - cg[1])**2) / Sum
         if fastener.zPos >= 0:
             fastener.loadsOutPlane = (pullforce - momentload)
         else:
             fastener.loadsOutPlane = (pullforce + momentload)
-
+    return
 
 #4.9---------------------------------------------------------------------------------------------------------------------
 
@@ -209,24 +210,24 @@ def calcPullThroughLoad(yforce, zmoment, Fasteners):
 force on the hinge wall/spacecraft wall and in the skin material there will be a shear force. In order to be safe and conservative we will consider the failure of one of the walls
 to be failure, therefore the vonmises stress will be calculated for both walls and the greater stress will be checked for failure."""
 
-def pullThroughTest(Fasteners, t2, t3, yieldstress):
+def CheckPullThrough(Fasteners, hinge):
+    failures = []
     for fastener in Fasteners:   #iterate through all fastener objects
         areabolthead = (fastener.D_fo/2)**2 * math.pi - (fastener.D_fi/2)**2 * math.pi    #calculate area on which compressive stress acts
         sigmay = fastener.loadsOutPlane/areabolthead      #calculate compressive stress
-        areat2 = math.pi * fastener.D_fo * t2   #calculate areas over which the shear stress will act
-        areat3 = math.pi * fastener.D_fo * t3
-        tau2 = fastener.loadsOutPlane/areat2       #calculate shear stresses
-        tau3 = fastener.loadsOutplane/areat3
+        areat2 = math.pi * fastener.D_fo * hinge.t2   #calculate areas over which the shear stress will act
+        areat3 = math.pi * fastener.D_fo * hinge.t3
+        tau2 = fastener.loadsOutPlane/areat2      #calculate shear stresses
+        tau3 = fastener.loadsOutPlane/areat3
         if areat2 <= areat3:   #calculate von mises stress for greater shear stress
             vonmises = math.sqrt(sigmay**2 + 3 * tau2**2)
         else:
             vonmises = math.sqrt(sigmay**2 + 3 * tau3**2)
         
-        failures = []
-        if vonmises < yieldstress:  #if vonmises stress is below tensile yield stress, test is passed and add true, if vonmises stress is higher add false to list
-            failures.append(True)
+        if vonmises < hinge.sigmaY:  #if vonmises stress is below tensile yield stress, test is passed and add true, if vonmises stress is higher add false to list
+            failures.append(0)
         else:
-            failures.append(False)
+            failures.append(1)
         
     return failures
 
