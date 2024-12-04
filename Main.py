@@ -16,7 +16,9 @@ The result of each calculation will be Saved in the hinge object, such that one 
 # 4.3------------------------------------------------------------------------------------------------------------------------------------
 
 def CalcLugDimOne(hinge):
-    resulto = scipy.optimize.minimize(CalcLugDimTwo, [0.01, 0.01, 0.02], bounds=scipy.optimize.Bounds([0.001, 0.001, 0.002], [0.25, 0.5, 0.5]))
+    x0 = [0.01, 0.01, 0.02]
+    x0 = np.ndarray(x0)
+    resulto = scipy.optimize.minimize(CalcLugDimTwo, x0, bounds=scipy.optimize.Bounds([0.001, 0.001, 0.002], [0.25, 0.5, 0.5]))
     print(resulto)
     hinge.t1 = resulto.x[0]
     hinge.w = resulto.x[1]

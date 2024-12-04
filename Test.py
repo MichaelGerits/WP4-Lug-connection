@@ -14,4 +14,4 @@ b=0
 
 checkResult = (1,0)
 print(np.abs(np.array(checkResult) - 1))
-a, b += np.abs(np.array(checkResult) - 1) * 0.001
+(a, b) += np.abs(np.array(checkResult) - 1) * 0.001
