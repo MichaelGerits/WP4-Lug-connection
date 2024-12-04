@@ -166,7 +166,7 @@ def CalcCGForces(Fasteners, CG):
 def CheckBearing(hinge, Fasteners):
     result = [1,1]
     for Fast in Fasteners:
-        P = np.linalg.norm(Fast.loadsInPlane)
+        P = np.linalg.norm(Fast.loadsInPlane) * 1.5
 
         #bearing check for the baseplate thickness
         if P/(hinge.D2*hinge.t2) > hinge.SigmaB:
