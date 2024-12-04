@@ -19,6 +19,6 @@ checkResult = Main.CheckBearing(hinge,Fasteners)
 #if bearingcheck returns false, we should increase the thickness
 while 0 in checkResult:
     
+
     hinge.t2, hinge.t3 += np.abs(np.array(checkResult) - 1) * 0.001
-    hinge.t2 += 0.001
     checkResult = Main.CheckBearing(hinge, Fasteners)

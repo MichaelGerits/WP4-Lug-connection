@@ -220,3 +220,13 @@ def pullThroughTest(dboltouter, dboltinner, load, t2, t3):
     tau2 = load/areat2
     tau3 = load/areat3
     
+
+
+#4.10--------------------------------------------------------------------------
+def CalcComplianceA(hinge, t):
+    """
+    calculates the compliance of the sheet that it is conneted to the fastener
+    """
+    delA = 4*t /()
+    
+    return delA 
