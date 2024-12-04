@@ -197,17 +197,13 @@ def calcPullThroughLoad(yforce, zmoment, Fasteners):
         di = posi - cg
         Sum += fastener.D_h**2 * math.pi * 0.25 * (di**2)
 
-    loads = []  #empty list for the loads
-    for fastener in Fasteners:  #iterate through fasteners again and determine the force due to the moment and its sign, add it to list
+    for fastener in Fasteners:  #iterate through fasteners again and determine the force due to the moment and its sign and edit the out of plane force for each fastener
         momentload = zmoment * fastener.D_h**2 * math.pi * math.sqrt((fastener.xPos - cg[0])**2+(fastener.zPos - cg[1])**2) / Sum
         if fastener.zPos >= 0:
-            loads.append(-momentload)
+            fastener.loadsOutPlane = (pullforce - momentload)
         else:
-            loads.append(momentload)
-    for load in loads:
-        load = load + pullforce
+            fastener.loadsOutPlane = (pullforce + momentload)
 
-    return loads    #return loads
 
 #4.9---------------------------------------------------------------------------------------------------------------------
 
@@ -215,22 +211,26 @@ def calcPullThroughLoad(yforce, zmoment, Fasteners):
 force on the hinge wall/spacecraft wall and in the skin material there will be a shear force. In order to be safe and conservative we will consider the failure of one of the walls
 to be failure, therefore the vonmises stress will be calculated for both walls and the greater stress will be checked for failure."""
 
-def pullThroughTest(dboltouter, dboltinner, load, t2, t3, yieldstress):
-    areabolthead = (dboltouter/2)**2 * math.pi - (dboltinner/2)**2 * math.pi    #calculate area on which compressive stress acts
-    sigmay = load/areabolthead      #calculate compressive stress
-    areat2 = math.pi * dboltouter * t2   #calculate areas over which the shear stress will act
-    areat3 = math.pi * dboltouter * t3
-    tau2 = load/areat2       #calculate shear stresses
-    tau3 = load/areat3
-    if areat2 <= areat3:   #calculate von mises stress for greater shear stress
-        vonmises = math.sqrt(sigmay**2 + 3 * tau2**2)
-    else:
-        vonmises = math.sqrt(sigmay**2 + 3 * tau3**2)
-    
-    if vonmises < yieldstress:  #if vonmises stress is below tensile yield stress, test is passed and return true, if vonmises stress is higher, return false
-        return True
-    else:
-        return False
+def pullThroughTest(Fasteners, t2, t3, yieldstress):
+    for fastener in Fasteners:   #iterate through all fastener objects
+        areabolthead = (fastener.D_fo/2)**2 * math.pi - (fastener.D_fi/2)**2 * math.pi    #calculate area on which compressive stress acts
+        sigmay = fastener.loadsOutPlane/areabolthead      #calculate compressive stress
+        areat2 = math.pi * fastener.D_fo * t2   #calculate areas over which the shear stress will act
+        areat3 = math.pi * fastener.D_fo * t3
+        tau2 = fastener.loadsOutPlane/areat2       #calculate shear stresses
+        tau3 = fastener.loadsOutplane/areat3
+        if areat2 <= areat3:   #calculate von mises stress for greater shear stress
+            vonmises = math.sqrt(sigmay**2 + 3 * tau2**2)
+        else:
+            vonmises = math.sqrt(sigmay**2 + 3 * tau3**2)
+        
+        failures = []
+        if vonmises < yieldstress:  #if vonmises stress is below tensile yield stress, test is passed and add true, if vonmises stress is higher add false to list
+            failures.append(True)
+        else:
+            failures.append(False)
+        
+    return failures
 
 #4.10--------------------------------------------------------------------------
 def CalcComplianceA(hinge, t, Fast):
