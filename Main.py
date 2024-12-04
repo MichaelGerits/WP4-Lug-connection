@@ -50,7 +50,7 @@ def CalcBasePlateDim(hinge, e1Fac=1.5, e2Fac=1.5, holeSepFac=2, fastenerAmount=P
     """
     calculates the dimensions of the baseplate with the width and the factors of seperation
     """
-
+    #TODO: change to min D2 and change w accordingly
     hinge.D2 = hinge.w/(2 * e1Fac + holeSepFac*(fastenerAmount/fastenerColumns-1))
     hinge.e1 = e1Fac*hinge.D2
     hinge.e2 = e2Fac*hinge.D2

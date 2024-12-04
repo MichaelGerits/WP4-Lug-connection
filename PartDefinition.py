@@ -15,7 +15,6 @@ class Hinge:
     as well as any calculation
     """
     def __init__(self, w=0, D1=0, D2=0, t1=0, t2=0, t3=0, e1=0, e2=0, E=70e9, G=0, rho=0, sigmaY=0, SigmaB=0, depth=0) -> None:
-        self.h = w
         self.D1 = D1
         self.D2 = D2
         self.t1 = t1
@@ -24,6 +23,7 @@ class Hinge:
         self.e1 = e1 #limits depending on the material choice
         self.e2 = e2
         self.w = w
+        self.h = self.w
         self.depth = depth
 
         self.E = E
@@ -72,5 +72,5 @@ class Fastener:
 
     def CalcComplianceB(self):
         self.comp = 0
-
+        #TODO: implement simplified bolt
         #TODO: sum up the elongations and divide by the youngs modulus
