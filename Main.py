@@ -211,20 +211,23 @@ def calcPullThroughLoad(yforce, zmoment, Fasteners):
 
 #4.9---------------------------------------------------------------------------------------------------------------------
 
-#the tensile stress acts on the area where the bold head touches the skin
+"""this function performs a pull through test. the variable load is the force that is vertically applied to the load. it causes the fastener head to apply a compressive
+force on the hinge wall/spacecraft wall and in the skin material there will be a shear force. In order to be safe and conservative we will consider the failure of one of the walls
+to be failure, therefore the vonmises stress will be calculated for both walls and the greater stress will be checked for failure."""
+
 def pullThroughTest(dboltouter, dboltinner, load, t2, t3, yieldstress):
-    areabolthead = (dboltouter/2)**2 * math.pi - (dboltinner/2)**2 * math.pi
-    sigmay = load/areabolthead
-    areat2 = math.pi * dboltouter * t2
+    areabolthead = (dboltouter/2)**2 * math.pi - (dboltinner/2)**2 * math.pi    #calculate area on which compressive stress acts
+    sigmay = load/areabolthead      #calculate compressive stress
+    areat2 = math.pi * dboltouter * t2   #calculate areas over which the shear stress will act
     areat3 = math.pi * dboltouter * t3
-    tau2 = load/areat2
+    tau2 = load/areat2       #calculate shear stresses
     tau3 = load/areat3
-    if areat2 <= areat3:
+    if areat2 <= areat3:   #calculate von mises stress for greater shear stress
         vonmises = math.sqrt(sigmay**2 + 3 * tau2**2)
     else:
         vonmises = math.sqrt(sigmay**2 + 3 * tau3**2)
     
-    if vonmises < yieldstress:
+    if vonmises < yieldstress:  #if vonmises stress is below tensile yield stress, test is passed and return true, if vonmises stress is higher, return false
         return True
     else:
         return False
