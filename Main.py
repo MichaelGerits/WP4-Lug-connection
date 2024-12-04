@@ -21,13 +21,14 @@ def CalcLugDimOne(hinge):
     hinge.t1 = resulto.x[0]
     hinge.w = resulto.x[2]
     hinge.D1 = resulto.x[1]
+    print(f"t1 is {hinge.t1}", f"w is {hinge.w}", f"D1 is {hinge.D1}")
 
 
 def CalcLugDimTwo(arr):
     t1, D1, w = arr
     P = Loads.P
     F1 = Loads.F1
-    sigma = 4.14e7
+    sigma = 4.14e7 # Pa
 
     A_frac = 6 / (D1 * (4 / (0.5 * w - math.sqrt(2) * 0.25 * D1) + 2 / (0.5 * (w - D1))))  # p18 fig D1.15
     K_bending = 1.3 / 1.4 * A_frac  # Fig D1.15 page 18
