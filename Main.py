@@ -212,11 +212,19 @@ def calcPullThroughLoad(yforce, zmoment, Fasteners):
 #4.9---------------------------------------------------------------------------------------------------------------------
 
 #the tensile stress acts on the area where the bold head touches the skin
-def pullThroughTest(dboltouter, dboltinner, load, t2, t3):
+def pullThroughTest(dboltouter, dboltinner, load, t2, t3, yieldstress):
     areabolthead = (dboltouter/2)**2 * math.pi - (dboltinner/2)**2 * math.pi
     sigmay = load/areabolthead
     areat2 = math.pi * dboltouter * t2
     areat3 = math.pi * dboltouter * t3
     tau2 = load/areat2
     tau3 = load/areat3
+    if areat2 <= areat3:
+        vonmises = math.sqrt(sigmay**2 + 3 * tau2**2)
+    else:
+        vonmises = math.sqrt(sigmay**2 + 3 * tau3**2)
     
+    if vonmises < yieldstress:
+        return True
+    else:
+        return False
