@@ -16,7 +16,7 @@ The result of each calculation will be Saved in the hinge object, such that one 
 # 4.3------------------------------------------------------------------------------------------------------------------------------------
 
 def CalcLugDimOne(hinge):
-    resulto = scipy.optimize.minimize(CalcLugDimTwo, [0.01, 0.01, 0.02], bounds=scipy.optimize.Bounds([0.001, 0.001, 0.002], [0.25, 0.5, 0.5]))
+    resulto = scipy.optimize.minimize(CalcLugDimTwo, [hinge.t1, hinge.w, hinge.D1], bounds=scipy.optimize.Bounds([0.001, 0.001, 0.002], [0.25, 0.5, 0.5]))
     print(resulto)
     hinge.t1 = resulto.x[0]
     hinge.w = resulto.x[1]
@@ -68,7 +68,7 @@ def CalcFastenerPos(hinge, fastenerAmount = PD.fastenerAmount, columnAmount = PD
     #You can fil in a custom amount of fasteners
 
     #initialise the list of fasteners
-    Fasteners = [] * fastenerAmount
+    Fasteners = [None] * fastenerAmount
 
     #define the list of z positions
     posZs = np.linspace((hinge.w/2 - hinge.e1), (-hinge.w/2 + hinge.e1), int(fastenerAmount/columnAmount))
@@ -79,7 +79,6 @@ def CalcFastenerPos(hinge, fastenerAmount = PD.fastenerAmount, columnAmount = PD
     #creates a list with all the positions
     posTup = list(itertools.product(posXs, posZs))
     #define the fasteners and their positions
-
 
     for i in range(fastenerAmount):
         #calculate positions
@@ -144,29 +143,27 @@ def CalcCGForces(Fasteners, CG):
     for Fast in Fasteners:
         posi = np.array([Fast.xPos, Fast.zPos])
         di = posi - CG
-        Sum += Fast.D_h**2 * math.pi * 0.25 * (di**2)    
+        Sum += Fast.D_h**2 * math.pi * 0.25 * (np.linalg.norm(di)**2)    
+    
 
 
     #Calculate the loads on each fasteners
-    i=0
     for Fast in Fasteners:
         load = np.zeros(3)
         pos = np.array([Fast.xPos, Fast.zPos])
         d = pos - CG
 
         load[0:2] = Fcg/(len(Fasteners))
-        load[2] = (Mycg * Fast.D_h**2 * math.pi * 0.25 * d)/Sum
+        load[2] = (Mycg * Fast.D_h**2 * math.pi * 0.25 * np.linalg.norm(d))/Sum
 
         #saves the load vector to the fastener object
         Fast.loadsInPlane = load
-        FastenerLoads[i] = load
-        i+=1
     #returns the loads as a matrix for debugging
     return FastenerLoads
     
 #4.7-------------------------------------------------------------------------
 def CheckBearing(hinge, Fasteners):
-    result = (1,1)
+    result = [1,1]
     for Fast in Fasteners:
         P = np.linalg.norm(Fast.loadsInPlane)
 
@@ -240,3 +237,4 @@ def CalcComplianceA(hinge, t, Fast):
     delA = (4* t *hinge.E)/(math.pi*(Fast.D_fo**2 - Fast.D_fi**2)) #assume the youngs modulus is similar to the backplate one
     
     return delA 
+#compliance B is calculated in the fastener object
