@@ -16,11 +16,11 @@ The result of each calculation will be Saved in the hinge object, such that one 
 # 4.3------------------------------------------------------------------------------------------------------------------------------------
 
 def CalcLugDimOne(hinge):
-    resulto = scipy.optimize.minimize(CalcLugDimTwo, [hinge.t1, hinge.w, hinge.D1], bounds=scipy.optimize.Bounds([0.001, 0.001, 0.002], [0.25, 0.5, 0.5]))
+    resulto = scipy.optimize.minimize(CalcLugDimTwo, [hinge.t1, hinge.D1, hinge.w], bounds=scipy.optimize.Bounds([0.001, 0.001, 0.002], [0.25, 0.5, 0.5]))
     print(resulto)
     hinge.t1 = resulto.x[0]
-    hinge.w = resulto.x[2]
     hinge.D1 = resulto.x[1]
+    hinge.w = resulto.x[2]
     print(f"t1 is {hinge.t1}", f"w is {hinge.w}", f"D1 is {hinge.D1}")
 
 
@@ -166,7 +166,7 @@ def CalcCGForces(Fasteners, CG):
 def CheckBearing(hinge, Fasteners):
     result = [1,1]
     for Fast in Fasteners:
-        P = np.linalg.norm(Fast.loadsInPlane)
+        P = np.linalg.norm(Fast.loadsInPlane) * 1.5
 
         #bearing check for the baseplate thickness
         if P/(hinge.D2*hinge.t2) > hinge.SigmaB:

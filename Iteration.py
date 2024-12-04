@@ -4,7 +4,7 @@ import numpy as np
 from pprint import pprint
 
 # initial definition of the hinge object
-hinge = PD.Hinge(t1=0.001, t2=0.005, t3=0.005, D1=0.01, w=0.02, sigmaY=4.14e7, SigmaB=297e6)
+hinge = PD.Hinge(t1=0.001, t2=0.0005, t3=0.0005, D1=0.01, w=0.02, sigmaY=4.14e7, SigmaB=297e6)
 
 # runs the functions for the first time
 Main.CalcLugDimOne(hinge)
