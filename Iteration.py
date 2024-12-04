@@ -15,9 +15,10 @@ FastCG = Main.CalcCG(Fasteners)
 Main.CalcCGForces(Fasteners, FastCG)
 print("Bearingcheck")
 checkResult = Main.CheckBearing(hinge,Fasteners)
+print(checkResult)
 #if bearingcheck returns false, we should increase the thickness
 while 0 in checkResult:
-
+    print(checkResult)
     updateVal = np.abs(np.array(checkResult) - 1) * 0.001
     hinge.t2 += updateVal[0]
     hinge.t3 += updateVal[1]
