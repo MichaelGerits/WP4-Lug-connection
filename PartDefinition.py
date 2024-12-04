@@ -53,9 +53,9 @@ class Fastener:
         self.L2 = L2
         self.L3 = L3
         self.Lj = L1+L2+L3 #sum of the previous three lengths as per page 21
-        #self.L_h_sub = x*d #TODO: decide on nut geometry to find factor
-        #self.L_eng_sub = x*d #TODO: decide on nut geometry to find factor Table 7.1 page 22
-        #self.L_n_sub = x*d #TODO: decide on nut geometry to find factor
+        self.L_h_sub = 0.5*d #TODO: decide on nut geometry to find factor
+        self.L_eng_sub = 0.4*d #TODO: decide on nut geometry to find factor Table 7.1 page 22
+        self.L_n_sub = 0.4*d #TODO: decide on nut geometry to find factor
 
         self.E_b = E_b
         self.E_n = E_b if E_n==0 else E_n
