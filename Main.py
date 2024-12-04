@@ -19,8 +19,8 @@ def CalcLugDimOne(hinge):
     resulto = scipy.optimize.minimize(CalcLugDimTwo, [0.01, 0.01, 0.02], bounds=scipy.optimize.Bounds([0.001, 0.001, 0.002], [0.25, 0.5, 0.5]))
     print(resulto)
     hinge.t1 = resulto.x[0]
-    hinge.w = resulto.x[1]
-    hinge.D1 = resulto.x[2]
+    hinge.w = resulto.x[2]
+    hinge.D1 = resulto.x[1]
 
 
 def CalcLugDimTwo(arr):
