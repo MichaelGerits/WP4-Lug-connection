@@ -44,8 +44,8 @@ class Fastener:
         self.D_h = D_h
         self.d_sha = d_sha
         self.d = d
-        self.D_fo = d#TODO: calc Dfo
-        self.D_fi = d#TODO: calc Dfi
+        self.D_fo = d_uh_brg
+        self.D_fi = D_h
         self.sw = sw
 
         self.L_n = L_n
@@ -67,6 +67,7 @@ class Fastener:
         self.zPos = zPos
 
         self.loadsInPlane = np.empty(3) #due to Fx, due to Fz, due to My
+        self.loadsOutPlane = 0 #due to Fx, due to Fz, due to My
         pass
 
     def CalcComplianceB(self):
