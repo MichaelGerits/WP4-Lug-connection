@@ -58,8 +58,6 @@ def CalcBasePlateDim(hinge, e1Fac=1.5, e2Fac=1.5, holeSepFac=2, fastenerAmount=P
     hinge.depth = 2*(2* hinge.e2 + hinge.t1 + (fastenerColumns/2 - 1) * holeSepFac*hinge.D2) + hinge.h
 #---------------------------------------------------------------------------------------------------------------------------
 
-
-#TODO:calculate h
 #4.5------------------------------------------------------------------------------------------------------------------------
 def CalcFastenerPos(hinge, fastenerAmount = PD.fastenerAmount, columnAmount = PD.fastenerColumns):
     """
