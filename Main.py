@@ -95,7 +95,7 @@ def CalcCG(Fasteners):
     calculate the centre of gravity of the fasteners
     
     The fasteners are defined first.
-    The locacal coordinate system is the centre of the baseplate
+    The local coordinate system is the centre of the baseplate
     
     an even amount of fasteners is needed
     """
