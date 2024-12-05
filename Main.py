@@ -14,9 +14,9 @@ The result of each calculation will be Saved in the hinge object, such that one 
 """
 
 # 4.3------------------------------------------------------------------------------------------------------------------------------------
-
-def CalcLugDimOne(hinge):
-    resulto = scipy.optimize.minimize(CalcLugDimTwo, [hinge.t1, hinge.D1, hinge.w], bounds=scipy.optimize.Bounds([0.001, 0.001, 0.002], [0.25, 0.5, 0.5]))
+#set the minimum values o ore machinable values
+def CalcLugDimOne(hinge, w_min=0.002):
+    resulto = scipy.optimize.minimize(CalcLugDimTwo, [hinge.t1, hinge.D1, hinge.w], bounds=scipy.optimize.Bounds([0.0015, 0.008, w_min], [0.25, 0.5, 0.5]))
     print(resulto)
     hinge.t1 = resulto.x[0]
     hinge.D1 = resulto.x[1]
@@ -46,16 +46,25 @@ def CalcLugDimTwo(arr):
 
 
 #4.4-----------------------------------------------------------------------------------------------------------------
-def CalcBasePlateDim(hinge, e1Fac=1.5, e2Fac=1.5, holeSepFac=2, fastenerAmount=PD.fastenerAmount, fastenerColumns = PD.fastenerColumns):
+def CalcBasePlateDim(hinge, e1Fac=1.5, e2Fac=1.5, holeSepFac=2, fastenerAmount=PD.fastenerAmount, fastenerColumns = PD.fastenerColumns, minD2 = 0):
     """
     calculates the dimensions of the baseplate with the width and the factors of seperation
     """
-    #TODO: change to min D2 and change w accordingly
+    
+    #calc the minimum width
+    w_min = minD2 * (2 * e1Fac + holeSepFac*(fastenerAmount/fastenerColumns-1))
+    #updates the width and quits to rerun the first function
+    if w_min > hinge.w:
+        hinge.w = w_min
+        return (False, w_min)
+    
     hinge.D2 = hinge.w/(2 * e1Fac + holeSepFac*(fastenerAmount/fastenerColumns-1))
+
     hinge.e1 = e1Fac*hinge.D2
     hinge.e2 = e2Fac*hinge.D2
 
     hinge.depth = 2*(2* hinge.e2 + hinge.t1 + (fastenerColumns/2 - 1) * holeSepFac*hinge.D2) + hinge.h
+    return (True, 0.002)
 #---------------------------------------------------------------------------------------------------------------------------
 
 #4.5------------------------------------------------------------------------------------------------------------------------
@@ -83,8 +92,8 @@ def CalcFastenerPos(hinge, fastenerAmount = PD.fastenerAmount, columnAmount = PD
         #calculate positions
         posX, posZ = posTup[i]
 
-        #add to the list of fasteners
-        Fasteners[i] = PD.Fastener(d_uh_brg = 0.005, D_h = hinge.D2, xPos=posX, zPos=posZ)
+        #add to the list of fasteners TODO: define geometry clearly
+        Fasteners[i] = PD.Fastener(d_uh_brg = 1.7*hinge.D2, D_h = hinge.D2, xPos=posX, zPos=posZ)
 
     return Fasteners
 
@@ -185,7 +194,8 @@ by the number of bolts. The moment depends on the position of the fastener so it
 through all fasteners, and return a list of the loads on all the fasteners."""
 
 def calcPullThroughLoad(Fasteners):
-    pullforce = Loads.P[1]/len(Fasteners)
+#changed to add the moment couple
+    pullforce = max(abs((Loads.P[1] + Loads.F1)/len(Fasteners)), abs((Loads.P[1] - Loads.F1)/len(Fasteners)))
     #calculate force on each bolt due the force in y direction
     cg =CalcCG(Fasteners)   #calculate the cg of all the fasteners
     Sum = 0     #initialise variable for the sum
