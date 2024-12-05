@@ -17,7 +17,7 @@ The result of each calculation will be Saved in the hinge object, such that one 
 #set the minimum values o ore machinable values
 def CalcLugDimOne(hinge, w_min=0.002):
     resulto = scipy.optimize.minimize(CalcLugDimTwo, [hinge.t1, hinge.D1, hinge.w], bounds=scipy.optimize.Bounds([0.0015, 0.008, w_min], [0.25, 0.5, 0.5]))
-    print(resulto)
+    print("\n",resulto,"\n")
     hinge.t1 = resulto.x[0]
     hinge.D1 = resulto.x[1]
     hinge.w = resulto.x[2]
@@ -37,6 +37,8 @@ def CalcLugDimTwo(arr):
     check2 = 4 * K_t * sigma * t1 * (w - D1)
 
     if check1 > P[0] * 1.5 and check2 > (P[1] + F1) * 1.5 and w > D1 + t1:
+        #prints the margin of safety
+        print("MS LUG: ",check1/(P[0] * 1.5) - 1, check2/((P[1] + F1) * 1.5) - 1)
         return t1 * math.pi * (w ** 2 - D1 ** 2) / 4
     else:
         return 31415
@@ -137,7 +139,7 @@ def CalcCGForces(Fasteners, CG):
     """
     Calculates the forces on each fastener
     """
-    Fx, Fz = Loads.P[0], Loads.P[2]
+    Fx, Fz = Loads.P[0]/2 + Loads.T[1]*Loads.H, Loads.P[2]/2
 
     #Force on the cg
     Fcg = np.array([Fx, Fz])
@@ -173,6 +175,7 @@ def CalcCGForces(Fasteners, CG):
 #4.7-------------------------------------------------------------------------
 def CheckBearing(hinge, Fasteners):
     result = [1,1]
+    MS = []
     for Fast in Fasteners:
         P = np.linalg.norm(Fast.loadsInPlane) * 1.5
 
@@ -183,8 +186,8 @@ def CheckBearing(hinge, Fasteners):
         #bearing check for the spacecraft wall
         if P/(hinge.D2*hinge.t3) > hinge.SigmaB:
             result[1] = 0
-        
-    return result
+    MS = [hinge.SigmaB/(P/(hinge.D2*hinge.t2)) - 1, hinge.SigmaB/(P/(hinge.D2*hinge.t3)) - 1]
+    return (result, MS)
 
 
 #4.8-----------------------------------------------------------------------------------------------------------------
@@ -196,21 +199,23 @@ through all fasteners, and return a list of the loads on all the fasteners."""
 
 def calcPullThroughLoad(Fasteners):
 #changed to add the moment couple
-    pullforce = max(abs((Loads.P[1] + Loads.F1)/len(Fasteners)), abs((Loads.P[1] - Loads.F1)/len(Fasteners)))
+    pullforce = (Loads.P[1])/(len(Fasteners)*2) + (Loads.F1)/(len(Fasteners))
     #calculate force on each bolt due the force in y direction
     cg =CalcCG(Fasteners)   #calculate the cg of all the fasteners
     Sum = 0     #initialise variable for the sum
     for fastener in Fasteners:  #iterate through all fasteners, find their distance to cg and sum up their area times the square of their distance
         posi = np.array([fastener.xPos, fastener.zPos])
         di = posi - cg
-        Sum += fastener.D_h**2 * math.pi * 0.25 * (np.linalg.norm(di)**2)
+        Sum += fastener.D_h**2 * math.pi * 0.25 * (di[0]**2)
 
     for fastener in Fasteners:  #iterate through fasteners again and determine the force due to the moment and its sign and edit the out of plane force for each fastener
-        momentload = Loads.T[2] * fastener.D_h**2 * math.pi * math.sqrt((fastener.xPos - cg[0])**2+(fastener.zPos - cg[1])**2) / Sum
-        if fastener.zPos >= 0:
-            fastener.loadsOutPlane = (pullforce - momentload)
-        else:
+        posi = np.array([fastener.xPos, fastener.zPos])
+        di = posi - cg
+        momentload = Loads.T[2] * fastener.D_h**2 * math.pi* 0.25 * di[0] / (Sum*2)
+        if fastener.xPos >= 0:
             fastener.loadsOutPlane = (pullforce + momentload)
+        else:
+            fastener.loadsOutPlane = (pullforce - momentload)
     return
 
 #4.9---------------------------------------------------------------------------------------------------------------------
@@ -220,7 +225,8 @@ force on the hinge wall/spacecraft wall and in the skin material there will be a
 to be failure, therefore the vonmises stress will be calculated for both walls and the greater stress will be checked for failure."""
 
 def CheckPullThrough(Fasteners, hinge):
-    failures = []
+    check = []
+    MS = []
     for fastener in Fasteners:   #iterate through all fastener objects
         areabolthead = (fastener.D_fo/2)**2 * math.pi - (fastener.D_fi/2)**2 * math.pi    #calculate area on which compressive stress acts
         sigmay = fastener.loadsOutPlane/areabolthead      #calculate compressive stress
@@ -234,11 +240,14 @@ def CheckPullThrough(Fasteners, hinge):
             vonmises = math.sqrt(sigmay**2 + 3 * tau3**2)
         
         if vonmises < hinge.sigmaY:  #if vonmises stress is below tensile yield stress, test is passed and add true, if vonmises stress is higher add false to list
-            failures.append(0)
+            check.append(1)
+            MS.append(hinge.sigmaY/vonmises - 1)
+
         else:
-            failures.append(1)
+            check.append(0)
+            MS.append(hinge.sigmaY/vonmises - 1)
         
-    return failures
+    return check, MS
 
 #4.10--------------------------------------------------------------------------
 def CalcComplianceA(hinge, t, Fast):
