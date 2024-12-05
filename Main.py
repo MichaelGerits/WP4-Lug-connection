@@ -93,7 +93,7 @@ def CalcFastenerPos(hinge, fastenerAmount = PD.fastenerAmount, columnAmount = PD
         posX, posZ = posTup[i]
 
         #add to the list of fasteners TODO: define geometry clearly
-        Fasteners[i] = PD.Fastener(d_uh_brg = 1.7*hinge.D2, D_h = hinge.D2, xPos=posX, zPos=posZ)
+        Fasteners[i] = PD.Fastener(d_uh_brg = 1.7*hinge.D2, D_h = hinge.D2, L = hinge.t2 + hinge.t2, L_h=0.64*hinge.D2, L_n=0.019, xPos=posX, zPos=posZ)
 
     return Fasteners
 
