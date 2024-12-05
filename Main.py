@@ -55,6 +55,7 @@ def CalcBasePlateDim(hinge, e1Fac=1.5, e2Fac=1.5, holeSepFac=2, fastenerAmount=P
     w_min = minD2 * (2 * e1Fac + holeSepFac*(fastenerAmount/fastenerColumns-1))
     #updates the width and quits to rerun the first function
     if w_min > hinge.w:
+        print("\nAdjusting Width size\n")
         hinge.w = w_min
         return (False, w_min)
     

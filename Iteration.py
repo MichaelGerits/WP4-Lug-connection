@@ -15,7 +15,7 @@ min_check = (False, 0.002)
 while min_check[0] == False:
     Main.CalcLugDimOne(hinge, min_check[1])
     min_check = Main.CalcBasePlateDim(hinge, minD2=D2_min)
-Fasteners = Main.CalcFastenerPos(hinge)
+Fasteners = Main.CalcFastenerPos(hinge) #fatsener dimensions are also defined here
 FastCG = Main.CalcCG(Fasteners)
 Main.CalcCGForces(Fasteners, FastCG)
 
@@ -41,14 +41,18 @@ while 0 in checkResult:
 """
 calculate some lengths of the fasteners
 """
+
+DelA_bp = Main.CalcComplianceA(hinge, hinge.t2, Fasteners[0]) #calculate the compliance of the backplate and the spacecraft wall
+DelA_w = Main.CalcComplianceA(hinge, hinge.t3, Fasteners[0]) #calculate the compliance of the backplate and the spacecraft wall
+Phi = []
 for Fast in Fasteners:
-    Fast.Lj = hinge.t2 + hinge.t3
+    Fast.CalcComplianceB() #calculates the compliance of each bolt
+    Phi.append([DelA_bp/(DelA_bp + Fast.comp), DelA_w/(DelA_w + Fast.comp)])
+
 
 pprint(vars(hinge))
 print("---------------")
 pprint(vars(Fasteners[0]))
+print(Phi)
 
-
-DelA_bp = Main.CalcComplianceA(hinge, hinge.t2, Fasteners[0]) #calculate the compliance of the backplate and the spacecraft wall
-DelA_w = Main.CalcComplianceA(hinge, hinge.t3, Fasteners[0]) #calculate the compliance of the backplate and the spacecraft wall
 
