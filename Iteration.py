@@ -4,7 +4,7 @@ import numpy as np
 from pprint import pprint
 
 #specify the minimum bolt diameter
-D2_min = 0.005
+
 
 # initial definition of the hinge object
 #change t2, t3 to more resonable begin values
@@ -14,7 +14,7 @@ hinge = PD.Hinge(t1=0.001, t2=0.0005, t3=0.0005, D1=0.01, w=0.02, sigmaY=4.14e7,
 min_check = (False, 0.002)
 while min_check[0] == False:
     Main.CalcLugDimOne(hinge, min_check[1])
-    min_check = Main.CalcBasePlateDim(hinge, minD2=D2_min)
+    min_check = Main.CalcBasePlateDim(hinge, minD2=PD.minBoltD)
 Fasteners = Main.CalcFastenerPos(hinge) #fatsener dimensions are also defined here
 FastCG = Main.CalcCG(Fasteners)
 Main.CalcCGForces(Fasteners, FastCG)
