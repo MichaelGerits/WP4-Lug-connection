@@ -36,8 +36,8 @@ Main.calcPullThroughLoad(Fasteners)
 checkResult, MS = Main.CheckPullThrough(Fasteners, hinge)
 print(checkResult, "\npullthrough check MS: ", MS, "\n")
 while 0 in checkResult:
-    hinge.t2 += 0.001
-    hinge.t3 += 0.001
+    hinge.t2 += 0.0015
+    hinge.t3 += 0.0015
     Main.calcPullThroughLoad(Fasteners)
     checkResult, MS = Main.CheckPullThrough(Fasteners, hinge)
     print(checkResult, "\npullthrough check MS: ", MS, "\n")

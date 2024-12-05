@@ -211,7 +211,7 @@ def calcPullThroughLoad(Fasteners):
     for fastener in Fasteners:  #iterate through fasteners again and determine the force due to the moment and its sign and edit the out of plane force for each fastener
         posi = np.array([fastener.xPos, fastener.zPos])
         di = posi - cg
-        momentload = Loads.T[2] * fastener.D_h**2 * math.pi* 0.25 * di[0] / (Sum*2)
+        momentload = Loads.T[2] * fastener.D_h**2 * math.pi* 0.25 * di[0] / (Sum*2) #can be positive or negative
         fastener.loadsOutPlane = (pullforce + momentload)
     return
 
