@@ -212,10 +212,7 @@ def calcPullThroughLoad(Fasteners):
         posi = np.array([fastener.xPos, fastener.zPos])
         di = posi - cg
         momentload = Loads.T[2] * fastener.D_h**2 * math.pi* 0.25 * di[0] / (Sum*2)
-        if fastener.xPos >= 0:
-            fastener.loadsOutPlane = (pullforce + momentload)
-        else:
-            fastener.loadsOutPlane = (pullforce - momentload)
+        fastener.loadsOutPlane = (pullforce + momentload)
     return
 
 #4.9---------------------------------------------------------------------------------------------------------------------
