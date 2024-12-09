@@ -242,11 +242,11 @@ def CheckPullThrough(Fasteners, hinge):
         
         if vonmises < hinge.sigmaY:  #if vonmises stress is below tensile yield stress, test is passed and add true, if vonmises stress is higher add false to list
             check.append(1)
-            MS.append(hinge.sigmaY/vonmises - 1)
+            MS.append([hinge.sigmaY/math.sqrt(sigmay**2 + 3 * tau2**2) - 1, hinge.sigmaY/math.sqrt(sigmay**2 + 3 * tau3**2) - 1])
 
         else:
             check.append(0)
-            MS.append(hinge.sigmaY/vonmises - 1)
+            MS.append([hinge.sigmaY/math.sqrt(sigmay**2 + 3 * tau2**2) - 1, hinge.sigmaY/math.sqrt(sigmay**2 + 3 * tau3**2) - 1])
         
     return check, MS
 
