@@ -6,8 +6,8 @@ import Loads
 Below the definition goes as follows: A hinge is the entirety and the Lugs are the flanges of said hinge
 """
 
-fastenerAmount = 8 #the amount of fasteners per Hinge
-fastenerColumns = 4
+fastenerAmount = 4 #the amount of fasteners per Hinge
+fastenerColumns = 2
 minBoltD = 0.005
 
 class Hinge:
