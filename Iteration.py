@@ -8,7 +8,7 @@ from pprint import pprint
 
 # initial definition of the hinge object
 #change t2, t3 to more resonable begin values
-hinge = PD.Hinge(t1=0.001, t2=0.0005, t3=0.0005, D1=0.01, w=0.02, sigmaY=4.14e7, SigmaB=297e6)
+hinge = PD.Hinge(t1=0.001, t2=0.0005, t3=0.0005, D1=0.01, w=0.02, sigmaY=4.14e7, SigmaB=662e6)
 
 # runs the functions for the first time
 min_check = (False, 0.002)
@@ -24,7 +24,7 @@ print("\n----------------------------------------------------------\n")
 checkResult, MS = Main.CheckBearing(hinge,Fasteners)
 print(checkResult, "\nBearing check MS: ", MS, "\n")
 while 0 in checkResult:
-    updateVal = np.abs(np.array(checkResult) - 1) * 0.0005
+    updateVal = np.abs(np.array(checkResult) - 1) * 0.001
     hinge.t2 += updateVal[0]
     hinge.t3 += updateVal[1]
     checkResult, MS = Main.CheckBearing(hinge, Fasteners)
@@ -51,8 +51,8 @@ DelA_bp = Main.CalcComplianceA(hinge, hinge.t2, Fasteners[0]) #calculate the com
 DelA_w = Main.CalcComplianceA(hinge, hinge.t3, Fasteners[0]) #calculate the compliance of the backplate and the spacecraft wall
 Phi = []
 for Fast in Fasteners:
-    Fast.CalcComplianceB() #calculates the compliance of each bolt
-    Phi.append([DelA_bp/(DelA_bp + Fast.comp), DelA_w/(DelA_w + Fast.comp)])
+    compB = Fast.CalcComplianceB() #calculates the compliance of each bolt
+    Phi.append([DelA_bp/(DelA_bp + compB), DelA_w/(DelA_w + compB)])
 
 print("\n_____________________________FINAL DIMENSIONS____________________________\n")
 pprint(vars(hinge))

@@ -96,7 +96,7 @@ def CalcFastenerPos(hinge, fastenerAmount = PD.fastenerAmount, columnAmount = PD
         posX, posZ = posTup[i]
 
         #add to the list of fasteners TODO: define geometry clearly
-        Fasteners[i] = PD.Fastener(d_uh_brg = 1.7*hinge.D2, D_h = hinge.D2, L = hinge.t2 + hinge.t2, L_h=0.64*hinge.D2, L_n=0.019, xPos=posX, zPos=posZ)
+        Fasteners[i] = PD.Fastener(d_uh_brg = 0.008, D_h = hinge.D2, L = (hinge.t2 + hinge.t3), L_h=0.00365, L_n=0.004, xPos=posX, zPos=posZ)
 
     return Fasteners
 
@@ -174,19 +174,23 @@ def CalcCGForces(Fasteners, CG):
     
 #4.7-------------------------------------------------------------------------
 def CheckBearing(hinge, Fasteners):
+    """
+    This check also includes the thermal stress (calculated manually)
+    """
+    sigmaTh = 95e6
     result = [1,1]
     MS = []
     for Fast in Fasteners:
         P = np.linalg.norm(Fast.loadsInPlane) * 1.5
 
         #bearing check for the baseplate thickness
-        if P/(hinge.D2*hinge.t2) > hinge.SigmaB:
+        if P/(hinge.D2*hinge.t2) + sigmaTh > hinge.SigmaB:
             result[0] = 0
 
         #bearing check for the spacecraft wall
-        if P/(hinge.D2*hinge.t3) > hinge.SigmaB:
+        if P/(hinge.D2*hinge.t3) + sigmaTh > hinge.SigmaB:
             result[1] = 0
-    MS = [hinge.SigmaB/(P/(hinge.D2*hinge.t2)) - 1, hinge.SigmaB/(P/(hinge.D2*hinge.t3)) - 1]
+    MS = [hinge.SigmaB/(P/(hinge.D2*hinge.t2)+sigmaTh) - 1, hinge.SigmaB/(P/(hinge.D2*hinge.t3)+sigmaTh) - 1]
     return (result, MS)
 
 
@@ -251,7 +255,7 @@ def CalcComplianceA(hinge, t, Fast):
     """
     calculates the compliance of the sheet that it is conneted to the fastener
     """
-    delA = (4* t *hinge.E)/(math.pi*(Fast.D_fo**2 - Fast.D_fi**2)) #assume the youngs modulus is similar to the backplate one
+    delA = (4* t)/(hinge.E*math.pi*(Fast.D_fo**2 - Fast.D_fi**2)) #assume the youngs modulus is similar to the backplate one
     
     return delA 
 #compliance B is calculated in the fastener object

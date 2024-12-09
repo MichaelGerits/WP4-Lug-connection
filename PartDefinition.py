@@ -6,8 +6,8 @@ import Loads
 Below the definition goes as follows: A hinge is the entirety and the Lugs are the flanges of said hinge
 """
 
-fastenerAmount = 8 #the amount of fasteners per Hinge
-fastenerColumns = 4
+fastenerAmount = 4 #the amount of fasteners per Hinge
+fastenerColumns = 2
 minBoltD = 0.005
 
 class Hinge:
@@ -15,7 +15,7 @@ class Hinge:
     define the geometry and materials properties of the Hinge
     as well as any calculation
     """
-    def __init__(self, w=0, D1=0, D2=0, t1=0, t2=0, t3=0, e1=0, e2=0, E=70e9, G=0, rho=0, sigmaY=0, SigmaB=0, depth=0) -> None:
+    def __init__(self, w=0, D1=0, D2=0, t1=0, t2=0, t3=0, e1=0, e2=0, E=69e9, G=0, rho=0, sigmaY=0, SigmaB=0, depth=0) -> None:
         self.D1 = D1
         self.D2 = D2
         self.t1 = t1
@@ -39,7 +39,7 @@ class Fastener:
     define geometry material properties and forces on a bolt
     geometry taken from WP4 p20-21
     """
-    def __init__(self, d_uh_brg=0, L_h=0, L=0, D_h=0, d_sha=0, L_n=0, sw=0, E_b=70e9, E_n=0, G=0, sigmaY=0, rho=0, xPos = 0, zPos = 0) -> None:
+    def __init__(self, d_uh_brg=0, L_h=0, L=0, D_h=0, d_sha=0, L_n=0, sw=0, E_b=120e9, E_n=0, G=0, sigmaY=0, rho=0, xPos = 0, zPos = 0) -> None:
         self.L_fac = 1.3 #factor for how much beyond the nut it should extend
         self.d_uh_brg = d_uh_brg
         self.L_h = L_h
@@ -72,4 +72,4 @@ class Fastener:
     def CalcComplianceB(self):
         A_nom, A_3, A_sha = [math.pi * self.D_h**2 * 0.25] * 3
         L_sha = self.L - self.L_fac*self.L_n
-        self.comp = 1/self.E_b * (self.L_h_sub/A_nom + self.L_eng_sub/A_3 + L_sha/A_sha) + self.L_n_sub/(self.E_n * A_nom)
+        return 1/self.E_b * (self.L_h_sub/A_nom + self.L_eng_sub/A_3 + L_sha/A_sha) + self.L_n_sub/(self.E_n * A_nom)
